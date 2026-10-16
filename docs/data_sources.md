@@ -18,10 +18,11 @@ This document lists the official sources intended for the ED Surge Simulator's i
 
 ## FEMA disaster declarations
 
-- **Official dataset page:** [OpenFEMA Disaster Declarations Summaries](https://www.fema.gov/about/openfema/disaster-declarations-summaries)
-- **API endpoint:** [DisasterDeclarationsSummaries API](https://www.fema.gov/api/open/v1/DisasterDeclarationsSummaries)
+- **Official dataset page:** [OpenFEMA Disaster Declarations Summaries v2](https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2)
+- **API endpoint:** [DisasterDeclarationsSummaries v2 API](https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries)
 - **Purpose:** Declared disaster event timelines and locations for event-level scenario context.
 - **Preprocessing note:** Preserve the API response and request metadata. FEMA documents limitations in historical geography and manually entered records; declarations are not a complete inventory of all local hazard exposure.
+- **Implemented scope:** Phase 2C-1 acquisition/audit and Phase 2C-2 declaration-level handoff preprocessing. The query explicitly filters `state eq 'TX' and fipsCountyCode eq '201'`; FIPS identifiers remain strings. Statewide relevance is not implied. No physical-event consolidation, HURDAT2 processing, or disaster demand model is implemented. See [OpenFEMA acquisition, audit, and handoff](openfema_acquisition_audit.md).
 
 ## NOAA HURDAT2 hurricane tracks
 

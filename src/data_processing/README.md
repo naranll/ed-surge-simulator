@@ -1,6 +1,6 @@
 # Data processing package
 
-This package prepares documented, reproducible inputs for the ED Surge Simulator. NHAMCS Phase 2A adds codebook-aware preprocessing for selected 2022 ED variables; NOAA and disaster modules remain at the ingestion/audit stage.
+This package prepares documented, reproducible inputs for the ED Surge Simulator. NHAMCS Phase 2A provides codebook-aware preprocessing; NOAA Phase 2B provides weather preprocessing and meteorological heatwave detection. OpenFEMA Phase 2C provides acquisition, an independent source audit, and a declaration-level handoff table. Physical-event consolidation and HURDAT2 ingestion are not implemented.
 
 ## Planned workflow
 
@@ -10,7 +10,7 @@ Modules are separated by source so the NHAMCS 2022 ED data, NOAA Houston weather
 
 Observed data, cited literature-based parameters, and synthetic assumptions must remain explicitly labeled. Patient-level NHAMCS records must not be joined to local weather or disaster events without a valid geographic and temporal linkage.
 
-See [`docs/data_sources.md`](../../docs/data_sources.md) for source URLs and preprocessing notes.
+See [`docs/data_sources.md`](../../docs/data_sources.md) for source URLs and preprocessing notes, and [OpenFEMA instructions](../../docs/openfema_acquisition_audit.md) for acquisition/offline auditing.
 
 ## Phase 1: ingestion and quality audits
 
