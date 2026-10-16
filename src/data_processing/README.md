@@ -1,6 +1,6 @@
 # Data processing package
 
-This package prepares documented, reproducible inputs for the ED Surge Simulator. NHAMCS Phase 2A provides codebook-aware preprocessing; NOAA Phase 2B provides weather preprocessing and meteorological heatwave detection. OpenFEMA Phase 2C provides acquisition, an independent source audit, and a declaration-level handoff table. Physical-event consolidation and HURDAT2 ingestion are not implemented.
+This package prepares documented, reproducible inputs for the ED Surge Simulator. NHAMCS Phase 2A provides codebook-aware preprocessing; NOAA Phase 2B provides weather preprocessing and meteorological heatwave detection. OpenFEMA Phase 2C provides acquisition, an independent source audit, and a declaration-level handoff table. HURDAT2 provides an Atlantic best-track handoff and a reviewed FEMA candidate crosswalk without consolidating physical events.
 
 ## Planned workflow
 
