@@ -125,3 +125,47 @@ Run its focused tests with:
 ```bash
 python -m unittest tests.test_nhamcs_2018_22 -v
 ```
+
+### Minimal parameter contract
+
+Generate `data/processed/params.json` from the existing processed visits:
+
+```bash
+python src/data_processing/simulation_parameters.py
+```
+
+Optional `--input` and `--output` arguments select alternative paths. No earlier
+pipeline is rerun. The JSON is Git-ignored and deterministic for the same input
+bytes and filename. The exporter records the input SHA-256, retains duplicate
+records in counts, and pools all source years without survey weighting.
+
+Schema version `1.0` has these exact fields:
+
+| Field | Type / meaning |
+|---|---|
+| `schema_version` | String `1.0` |
+| `source` | Object: `dataset`, `file_name`, `sha256`, `provenance_status`, `weighting`, `pooling` (strings), `records` (integer) |
+| `hourly_arrivals` | Object: `hours` (integers 0-23), `counts` (24 integers), `proportions` (24 numbers), `denominator`, `excluded_records` (integers), `excluded_by_status` (`missing` and `invalid` integer counts) |
+| `triage` | Same distribution fields, with `codes` (integers 1-5) replacing `hours`; counts/proportions have five entries |
+| `unavailable_parameters` | Keys `provider_service_times`, `admission_probabilities`, `boarding_durations`; each object has `value: null`, `status: unavailable_from_primary_dataset`, `reason` and `owner: Simulation Team` |
+| `limitations` | Array of scientific and integration limitation strings |
+
+Arrays align by index: `hourly_arrivals.proportions[h]` is the relative probability
+for hour `h`; pair `triage.codes` with `triage.proportions` for numeric acuity
+sampling. Each distribution sums to one within floating-point tolerance and has
+its own denominator. Only rows marked `valid` contribute to that distribution;
+a missing arrival does not exclude a valid triage record. Unexpected status
+strings, inconsistent valid values, and zero denominators raise an error.
+
+These are sample proportions, not observed Houston rates. The Simulation Team
+must supply baseline daily ED volume before using the hourly curve to set arrival
+intensity. It must separately define service times, admission, boarding and
+staffing/capacity assumptions. A null parameter means unavailable, never zero;
+consumers must resolve it explicitly before using that part of the model. Waiting
+time is not provider service time. No values are borrowed from NHAMCS 2022, and
+unverified weekday codes are not converted into named weekday factors.
+
+This is a documented minimal contract; compatibility with an external simulator's
+original key names must be handled by its consumer. No simulator is included here.
+
+Focused tests: `python -m unittest tests.test_simulation_parameters -v`.
