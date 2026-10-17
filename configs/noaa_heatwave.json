@@ -1,0 +1,21 @@
+{
+  "station": "USW00012960",
+  "source_units": "ghcn_native_tenths",
+  "verified_source_sha256": "e9db3672fe89bb6b7bbd1853af015be4380c74ba14d60035705863da5b818d05",
+  "baseline_start": "1991-01-01",
+  "baseline_end": "2020-12-31",
+  "percentile": 0.95,
+  "window_half_width": 15,
+  "minimum_duration": 2,
+  "quantile_interpolation": "linear",
+  "comparison": ">",
+  "leap_day_policy": "exclude_samples_interpolate_adjacent_thresholds",
+  "quality_eligibility": "blank_quality_flag_only",
+  "missing_data_policy": "no_interpolation_break_runs",
+  "boundary_handling": "censor_adjacent_unknown_or_series_edge",
+  "minimum_baseline_coverage": 1.0,
+  "season": "all",
+  "definition": "percentile",
+  "absolute_threshold_c": null,
+  "optional_absolute_thresholds_c": [35.0, 37.77777777777778, 40.0]
+}
