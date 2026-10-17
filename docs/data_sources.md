@@ -29,7 +29,8 @@ This document lists the official sources intended for the ED Surge Simulator's i
 - **Official archive:** [NOAA National Hurricane Center data archive](https://www.nhc.noaa.gov/data/)
 - **Format documentation:** [Atlantic HURDAT2 format documentation (PDF)](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atl-1851-2021.pdf)
 - **Purpose:** Atlantic tropical cyclone best-track positions and storm intensity for event-level hurricane scenario analysis near Houston.
-- **Preprocessing note:** Record the source file/version date and parser assumptions. Any storm-to-region proximity feature must use an explicit spatial rule and must remain separate from patient records absent valid linkage.
+- **Implemented snapshot:** Atlantic HURDAT2 1851–2025, file `hurdat2-1851-2025-092326.txt`, retrieved 2026-10-16 from NHC. The raw-file SHA-256 is `75202780ce56c8458f16fbef5fb8a026b99b00878dbb95c458211b3e6ef125b4`.
+- **Preprocessing note:** The handoff retains raw and typed track fields and reviewed FEMA candidate relationships. Nearest recorded distance to the documented Houston reference point is contextual screening only. It does not establish local wind, rain, flooding, damage, hospital exposure, or ED demand. See [HURDAT2 handoff instructions](hurdat2_handoff.md).
 
 ## Simulation parameters and evidence
 
