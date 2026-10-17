@@ -107,7 +107,13 @@ class EngineTests(unittest.TestCase):
             arr = generate_arrivals(COMPOUND, seed, snap.now, snap.now + 240, base_pid=10**6)
             a = simulate(snap, arr, None, hours=4)
             b = simulate(snap, arr, "ADD_PHYSICIAN+ADD_NURSE", hours=4)
-            self.assertLessEqual(b.mean_d2d, a.mean_d2d + 1e-9)
+            # CHANGED 2026-10-17: this used to compare mean_d2d (the average wait of patients who were
+            # SEEN). That measure can go UP when extra staff help, because extra staff let more
+            # long-waiting patients get seen inside the 4 hours and their long waits then enter the
+            # average. With the real-data patient mix it rose 1.5 min in seed 1 while the median wait
+            # of everyone (median_wait counts patients still waiting) and the late-patient count both
+            # improved. median_wait is the fair "never hurts" measure.
+            self.assertLessEqual(b.median_wait, a.median_wait + 1e-9)
             self.assertEqual(a.n, b.n)
 
     def test_compound_is_harder_than_normal(self):

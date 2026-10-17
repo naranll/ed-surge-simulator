@@ -1,0 +1,372 @@
+{
+  "context": {
+    "all_events": {
+      "duration_days_mean": 3.2015,
+      "duration_days_median": 2.0,
+      "n_events": 134
+    },
+    "definitions": [
+      "percentile"
+    ],
+    "events_by_start_month": {
+      "1": 12,
+      "10": 8,
+      "11": 6,
+      "12": 15,
+      "2": 12,
+      "3": 13,
+      "4": 9,
+      "5": 7,
+      "6": 16,
+      "7": 11,
+      "8": 16,
+      "9": 9
+    },
+    "events_starting_jun_to_sep": {
+      "duration_days_mean": 3.9231,
+      "duration_days_median": 3.0,
+      "n_events": 52
+    },
+    "note": "CONTEXT only. These NOAA events use a percentile rule with season 'all', so some are winter events (see events_by_start_month). Never used as a surge size or multiplier; surge sizes come only from published studies.",
+    "source": "NOAA GHCN-Daily heatwave events (heatwave_events.csv)",
+    "stations": [
+      "USW00012960"
+    ],
+    "status": "computed",
+    "tag": "CONTEXT"
+  },
+  "hourly_shape": {
+    "alt_unweighted": [
+      0.025091876822,
+      0.023697883665,
+      0.018818907616,
+      0.015967557977,
+      0.016284374604,
+      0.015333924724,
+      0.020909897351,
+      0.025852236725,
+      0.041059434799,
+      0.052148016728,
+      0.064440501838,
+      0.060828792295,
+      0.061525788873,
+      0.063616778609,
+      0.057153719427,
+      0.053161829933,
+      0.05563299962,
+      0.056646812825,
+      0.055569636295,
+      0.053288556583,
+      0.048853123812,
+      0.044481054366,
+      0.038588265112,
+      0.031048029401
+    ],
+    "counts_unweighted": [
+      396,
+      374,
+      297,
+      252,
+      257,
+      242,
+      330,
+      408,
+      648,
+      823,
+      1017,
+      960,
+      971,
+      1004,
+      902,
+      839,
+      878,
+      894,
+      877,
+      841,
+      771,
+      702,
+      609,
+      490
+    ],
+    "cross_check": {
+      "cleaned_csv_lines_up_with_dta": true,
+      "dta_invalid_rows": 243,
+      "dta_valid_rows": 15782,
+      "hourly_counts_identical": true,
+      "invalid_count_identical": true,
+      "max_abs_diff_weighted_share_vs_dta_weights": 1.0156729624011263e-10,
+      "method": "hour recomputed from raw ARRTIME text in the official .dta (HHMM, 0000-2359)",
+      "row_by_row_hours_identical": true
+    },
+    "denominator": 15782,
+    "excluded_invalid": {
+      "by_raw_ARRTIME": {
+        "-9": 243
+      },
+      "count": 243,
+      "note": "-9 is 'blank' in the codebook."
+    },
+    "note": "Share of ED visits arriving in each clock hour (index 0 = 00:00-00:59). Weighted by PATWT. National sample, not one hospital. Visits with a blank or invalid arrival time are left out.",
+    "source": "ARRTIME (hour of the HHMM arrival time; cleaned column arrival_hour)",
+    "status": "verified",
+    "tag": "DATA",
+    "value": [
+      0.023915437754,
+      0.021132657851,
+      0.019042231516,
+      0.017488321668,
+      0.018280206015,
+      0.017122831466,
+      0.018691637709,
+      0.026869157518,
+      0.042424847984,
+      0.053487395499,
+      0.064310489421,
+      0.060178808867,
+      0.062336694166,
+      0.062450894792,
+      0.055673514803,
+      0.050909927707,
+      0.056111238068,
+      0.057449980933,
+      0.055884548764,
+      0.052671161968,
+      0.048497903108,
+      0.044401673469,
+      0.04080845969,
+      0.029859979262
+    ],
+    "weighting": "PATWT"
+  },
+  "monday_factor": {
+    "alt_unweighted": 1.149266770671,
+    "denominator": 16025,
+    "monday_code": 2,
+    "monday_share": 0.168931051068,
+    "note": "Monday share divided by an even share (1/7). Monday is VDAYR code 2, confirmed from the official .dta value labels. Weighted by PATWT.",
+    "source": "VDAYR (Monday share / (1/7))",
+    "status": "verified",
+    "tag": "DATA",
+    "value": 1.182517357476,
+    "weighting": "PATWT"
+  },
+  "notes_check": [
+    {
+      "computed_value": 0.06431,
+      "name": "peak_hour_share",
+      "note": "Actual peak hour is 10:00 (the project notes say 10 AM). PATWT-weighted.",
+      "notes_value": 0.064,
+      "pass_within_10pct": true,
+      "relative_difference": 0.004844
+    },
+    {
+      "computed_value": 0.06431,
+      "name": "hour_10_share",
+      "note": "Share at 10 AM, because the project notes name 10 AM as the peak. PATWT-weighted.",
+      "notes_value": 0.064,
+      "pass_within_10pct": true,
+      "relative_difference": 0.004844
+    },
+    {
+      "computed_value": 0.017123,
+      "name": "quietest_hour_share",
+      "note": "Actual quietest hour is 5:00. PATWT-weighted.",
+      "notes_value": 0.017,
+      "pass_within_10pct": true,
+      "relative_difference": 0.007235
+    },
+    {
+      "computed_value": 0.168931,
+      "name": "monday_share",
+      "note": "Monday is VDAYR code 2 (from the .dta value labels). PATWT-weighted.",
+      "notes_value": 0.169,
+      "pass_within_10pct": true,
+      "relative_difference": -0.000408
+    },
+    {
+      "computed_value": 0.125073,
+      "name": "saturday_share",
+      "note": "Saturday is VDAYR code 7 (from the .dta value labels). PATWT-weighted.",
+      "notes_value": 0.125,
+      "pass_within_10pct": true,
+      "relative_difference": 0.000584
+    },
+    {
+      "computed_value": 0.124741,
+      "name": "sunday_share",
+      "note": "Sunday is VDAYR code 1 (from the .dta value labels). PATWT-weighted.",
+      "notes_value": 0.125,
+      "pass_within_10pct": true,
+      "relative_difference": -0.002072
+    },
+    {
+      "computed_value": 139,
+      "name": "triage_level_1_count",
+      "note": "Visits with a valid recorded level (unweighted count).",
+      "notes_value": 139,
+      "pass_within_10pct": true,
+      "relative_difference": 0.0
+    },
+    {
+      "computed_value": 1595,
+      "name": "triage_level_2_count",
+      "note": "Visits with a valid recorded level (unweighted count).",
+      "notes_value": 1595,
+      "pass_within_10pct": true,
+      "relative_difference": 0.0
+    },
+    {
+      "computed_value": 5340,
+      "name": "triage_level_3_count",
+      "note": "Visits with a valid recorded level (unweighted count).",
+      "notes_value": 5340,
+      "pass_within_10pct": true,
+      "relative_difference": 0.0
+    },
+    {
+      "computed_value": 2826,
+      "name": "triage_level_4_count",
+      "note": "Visits with a valid recorded level (unweighted count).",
+      "notes_value": 2826,
+      "pass_within_10pct": true,
+      "relative_difference": 0.0
+    },
+    {
+      "computed_value": 307,
+      "name": "triage_level_5_count",
+      "note": "Visits with a valid recorded level (unweighted count).",
+      "notes_value": 307,
+      "pass_within_10pct": true,
+      "relative_difference": 0.0
+    }
+  ],
+  "schema_version": "1.0",
+  "source": {
+    "cleaned_file": "nhamcs_2022_cleaned.csv",
+    "cleaned_sha256": "07e6b0bee834d1dd22cee8d53a4d6bd00fa613ddbaf5ffd2286832617c619b4f",
+    "computed_on": "2026-10-17",
+    "dataset": "NHAMCS 2022 Emergency Department public-use file (national sample)",
+    "dta_member": "ed2022-stata.dta",
+    "file": "ed2022-stata.zip",
+    "records": 16025,
+    "sha256": "aa32e635ef9564b1c8e03cea16c87ec2ed02e9a928d22a257df18100a38ad683"
+  },
+  "triage_mix": {
+    "alt_unweighted": [
+      0.013618105222,
+      0.156265308122,
+      0.523170373273,
+      0.276868815519,
+      0.030077397864
+    ],
+    "code_labels": {
+      "-8": "Unknown",
+      "-9": "Blank",
+      "0": "No triage for this visit but ESA does conduct triage",
+      "1": "Immediate",
+      "2": "Emergent",
+      "3": "Urgent",
+      "4": "Semi-urgent",
+      "5": "Nonurgent",
+      "7": "Visit occurred in ESA that does not conduct nursing triage"
+    },
+    "counts_unweighted": [
+      139,
+      1595,
+      5340,
+      2826,
+      307
+    ],
+    "cross_check": {
+      "cleaned_csv_lines_up_with_dta": true,
+      "dta_level_counts": [
+        139,
+        1595,
+        5340,
+        2826,
+        307
+      ],
+      "level_counts_identical": true,
+      "method": "valid-level counts compared with IMMEDR 1..5 in the official .dta"
+    },
+    "denominator": 10207,
+    "excluded_invalid": {
+      "by_code": {
+        "-8": 3788,
+        "-9": 364,
+        "0": 587,
+        "7": 1079
+      },
+      "count": 5818
+    },
+    "note": "Index 0 = level 1 (Immediate) ... index 4 = level 5 (Nonurgent). Weighted by PATWT. Only visits with a recorded level 1..5 are used; the rest are left out, not assigned a level. Level 1 has few visits, so its share is uncertain.",
+    "source": "IMMEDR (triage level; valid levels 1..5 only, cleaned column IMMEDR_clean)",
+    "status": "verified",
+    "tag": "DATA",
+    "value": [
+      0.014985204716,
+      0.154189723664,
+      0.507350734464,
+      0.296424161341,
+      0.027050175816
+    ],
+    "weighting": "PATWT"
+  },
+  "weekday_shares": {
+    "alt_unweighted": {
+      "1": 0.125928237129,
+      "2": 0.164180967239,
+      "3": 0.150702028081,
+      "4": 0.148143525741,
+      "5": 0.143588143526,
+      "6": 0.14096723869,
+      "7": 0.126489859594
+    },
+    "code_labels": {
+      "1": "Sunday",
+      "2": "Monday",
+      "3": "Tuesday",
+      "4": "Wednesday",
+      "5": "Thursday",
+      "6": "Friday",
+      "7": "Saturday"
+    },
+    "counts_unweighted": {
+      "1": 2018,
+      "2": 2631,
+      "3": 2415,
+      "4": 2374,
+      "5": 2301,
+      "6": 2259,
+      "7": 2027
+    },
+    "cross_check": {
+      "cleaned_csv_lines_up_with_dta": true,
+      "labels_agree_with_stored_label_set": true,
+      "method": "counts per VDAYR code compared with the official .dta; labels decoded by pandas and compared with the stored label set VDAYRF",
+      "monday_codes_found": [
+        2
+      ],
+      "weekday_counts_identical": true
+    },
+    "denominator": 16025,
+    "excluded_invalid": {
+      "count": 0,
+      "note": "every row has a VDAYR code 1..7"
+    },
+    "note": "Share of ED visits on each day. Keys are the VDAYR codes exactly as in the file; 'code_labels' gives the meaning read from the official .dta value labels. Weighted by PATWT. National sample.",
+    "source": "VDAYR (day of week of visit)",
+    "status": "verified",
+    "tag": "DATA",
+    "value": {
+      "1": 0.12474148391,
+      "2": 0.168931051068,
+      "3": 0.156181359879,
+      "4": 0.143012735643,
+      "5": 0.145006506797,
+      "6": 0.137053483023,
+      "7": 0.12507337968
+    },
+    "weighting": "PATWT"
+  }
+}
