@@ -237,3 +237,7 @@ __marimo__/
 *.pfx
 secrets.*
 credentials.*
+
+node_modules/
+frontend/dist/
+
