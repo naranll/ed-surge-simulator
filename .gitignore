@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data pipeline inputs and generated outputs (keep directory placeholders only)
+/data/raw/**
+!/data/raw/.gitkeep
+/data/processed/**
+!/data/processed/.gitkeep
+/reports/**
+!/reports/.gitkeep
+
+# Local credentials and private keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
+credentials.*
