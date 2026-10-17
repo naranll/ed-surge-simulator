@@ -1,0 +1,65 @@
+{
+ "features": [
+  "queue_l1",
+  "queue_l2",
+  "queue_l3",
+  "queue_l4",
+  "queue_l5",
+  "longest_wait_l1",
+  "longest_wait_l2",
+  "longest_wait_l3",
+  "longest_wait_l4",
+  "longest_wait_l5",
+  "queue_total",
+  "bed_occupancy",
+  "boarders",
+  "doctors_busy_frac",
+  "nurses_busy_frac",
+  "staff_doctors",
+  "staff_nurses",
+  "beds_total",
+  "hour_of_day",
+  "minutes_since_start",
+  "arrivals_last_hour",
+  "forecast_next4h",
+  "forecast_ratio",
+  "surge_known",
+  "burst_possible"
+ ],
+ "models": {
+  "urgent_late": {
+   "kind": "linear",
+   "file": "urgent_late_logistic.json",
+   "params": {
+    "C": 0.1
+   }
+  },
+  "beds_full": {
+   "kind": "xgboost",
+   "file": "beds_full_xgboost.json",
+   "params": {
+    "n_estimators": 120,
+    "learning_rate": 0.06,
+    "max_depth": 4,
+    "min_child_weight": 1.0,
+    "subsample": 1.0,
+    "reg_lambda": 10.0
+   }
+  },
+  "lwbs": {
+   "kind": "linear",
+   "file": "lwbs_logistic.json",
+   "params": {
+    "C": 1.0
+   }
+  }
+ },
+ "alarm_thresholds": {
+  "urgent_late": 0.2524582888117474,
+  "beds_full": 0.3147711962461476,
+  "lwbs": 0.13822534263747546
+ },
+ "false_alarm_rate_on_normal_days": 0.05,
+ "horizon_minutes": 240,
+ "caveat": "This model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, not validated on a real hospital."
+}

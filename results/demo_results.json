@@ -1,0 +1,351 @@
+{
+  "generated": "2026-10-18 07:01:00",
+  "caveat": "Simulation built on national survey data (NHAMCS 2022) and stated assumptions. Not a real hospital, not medical advice. The early-warning model learns the simulator and is not validated on a real hospital.",
+  "scenarios": [
+    {
+      "scenario": "normal",
+      "hospital": "Large",
+      "days": "50",
+      "patients_per_day": "200.9",
+      "urgent_late_pct": "13.75",
+      "lwbs_pct": "1.89",
+      "peak_bed_occupancy_pct": "87.1",
+      "longest_queue": "13.5",
+      "ms_per_simulated_day": "6.62",
+      "recommended_plan": "Do nothing",
+      "plan_search_seconds": "39.9"
+    },
+    {
+      "scenario": "heatwave",
+      "hospital": "Large",
+      "days": "50",
+      "patients_per_day": "219.5",
+      "urgent_late_pct": "26.73",
+      "lwbs_pct": "6.78",
+      "peak_bed_occupancy_pct": "96.0",
+      "longest_queue": "21.2",
+      "ms_per_simulated_day": "14.93",
+      "recommended_plan": "12:00-18:00 +1 clinician, fast track",
+      "plan_search_seconds": "46.3"
+    },
+    {
+      "scenario": "hurricane",
+      "hospital": "Large",
+      "days": "50",
+      "patients_per_day": "222.7",
+      "urgent_late_pct": "22.31",
+      "lwbs_pct": "5.25",
+      "peak_bed_occupancy_pct": "94.9",
+      "longest_queue": "19.2",
+      "ms_per_simulated_day": "12.48",
+      "recommended_plan": "12:00-18:00 +1 clinician",
+      "plan_search_seconds": "50.2"
+    }
+  ],
+  "calibration_real_vs_simulated": [
+    {
+      "quantity": "urgent (levels 1-3) median wait, min",
+      "real_NHAMCS_2022": "15.0",
+      "simulated_normal_day": "5.1",
+      "note": "NHAMCS WAITTIME vs simulated door-to-doctor"
+    },
+    {
+      "quantity": "left without being seen, %",
+      "real_NHAMCS_2022": "1.89",
+      "simulated_normal_day": "1.59",
+      "note": "NHAMCS LWBS flag vs simulated (patience is a fixed 180 min ASSUMPTION)"
+    },
+    {
+      "quantity": "admitted to hospital, % of triaged visits",
+      "real_NHAMCS_2022": "12.24",
+      "simulated_normal_day": "11.9",
+      "note": "ADMITHOS vs simulated admission draw"
+    },
+    {
+      "quantity": "peak bed occupancy, % (design target, not data)",
+      "real_NHAMCS_2022": "",
+      "simulated_normal_day": "86.44",
+      "note": "ASSUMPTION: keep under 95% on a normal day"
+    },
+    {
+      "quantity": "peak arrival hour share, % (10:00)",
+      "real_NHAMCS_2022": "6.43",
+      "simulated_normal_day": "6.21",
+      "note": "NHAMCS ARRTIME vs simulated arrivals"
+    },
+    {
+      "quantity": "quietest arrival hour share, % (05:00)",
+      "real_NHAMCS_2022": "1.71",
+      "simulated_normal_day": "1.47",
+      "note": "NHAMCS ARRTIME vs simulated arrivals"
+    },
+    {
+      "quantity": "median care time level 1, min",
+      "real_NHAMCS_2022": "332.0",
+      "simulated_normal_day": "338.55",
+      "note": "LOV-WAITTIME (proxy) vs simulated consult + bed stay"
+    },
+    {
+      "quantity": "median care time level 2, min",
+      "real_NHAMCS_2022": "257.0",
+      "simulated_normal_day": "250.42",
+      "note": "LOV-WAITTIME (proxy) vs simulated consult + bed stay"
+    },
+    {
+      "quantity": "median care time level 3, min",
+      "real_NHAMCS_2022": "186.0",
+      "simulated_normal_day": "173.66",
+      "note": "LOV-WAITTIME (proxy) vs simulated consult + bed stay"
+    },
+    {
+      "quantity": "median care time level 4, min",
+      "real_NHAMCS_2022": "91.0",
+      "simulated_normal_day": "85.7",
+      "note": "LOV-WAITTIME (proxy) vs simulated consult + bed stay"
+    },
+    {
+      "quantity": "median care time level 5, min",
+      "real_NHAMCS_2022": "70.0",
+      "simulated_normal_day": "76.42",
+      "note": "LOV-WAITTIME (proxy) vs simulated consult + bed stay"
+    },
+    {
+      "quantity": "chosen capacity (ASSUMPTION set by calibration)",
+      "real_NHAMCS_2022": "beds=60",
+      "simulated_normal_day": "doctors=4",
+      "note": "triage nurses=3; 30 simulated days"
+    }
+  ],
+  "recommendations": {
+    "normal": {
+      "recommended": "Do nothing",
+      "reason": "Do nothing: the 95% range of the gain of '09:00-15:00 fast track' on the truth days (+0.26 to +1.90) does not stay above 2 points.",
+      "truth_check": {
+        "n_seeds": 50,
+        "gain": 1.0810200963168635,
+        "gain_lo": 0.2572806487445758,
+        "gain_hi": 1.9047595438891511,
+        "base_on_time_pct": 86.2491930557483,
+        "plan_on_time_pct": 87.95021315206515,
+        "base_nonurgent_median": 19.686880305298576,
+        "plan_nonurgent_median": 15.427093133653578,
+        "nonurgent_change_pct": -21.63769528531399,
+        "fairness_ok": true,
+        "base_lwbs": 4.0,
+        "plan_lwbs": 3.14
+      },
+      "days_tested": 50,
+      "hospital": "Large"
+    },
+    "heatwave": {
+      "recommended": "12:00-18:00 +1 clinician, fast track",
+      "reason": "Recommended: paired gain +12.77 points (95% range +8.82 to +16.71) on 50 truth days, fairness limit holds.",
+      "truth_check": {
+        "n_seeds": 50,
+        "gain": 12.765052987136384,
+        "gain_lo": 8.82362613377802,
+        "gain_hi": 16.706479840494747,
+        "base_on_time_pct": 73.27208214666291,
+        "plan_on_time_pct": 87.31713513379928,
+        "base_nonurgent_median": 65.77819284542126,
+        "plan_nonurgent_median": 15.735059692353245,
+        "nonurgent_change_pct": -76.07860749636185,
+        "fairness_ok": true,
+        "base_lwbs": 15.44,
+        "plan_lwbs": 3.3
+      },
+      "days_tested": 50,
+      "hospital": "Large"
+    },
+    "hurricane": {
+      "recommended": "12:00-18:00 +1 clinician",
+      "reason": "Recommended: paired gain +8.49 points (95% range +5.08 to +11.91) on 50 truth days, fairness limit holds.",
+      "truth_check": {
+        "n_seeds": 50,
+        "gain": 8.494517030010662,
+        "gain_lo": 5.083665330281244,
+        "gain_hi": 11.905368729740081,
+        "base_on_time_pct": 77.68531849915928,
+        "plan_on_time_pct": 87.87983552916994,
+        "base_nonurgent_median": 51.32159979702138,
+        "plan_nonurgent_median": 15.609918654599557,
+        "nonurgent_change_pct": -69.58411523347422,
+        "fairness_ok": true,
+        "base_lwbs": 12.12,
+        "plan_lwbs": 2.92
+      },
+      "days_tested": 50,
+      "hospital": "Large"
+    }
+  },
+  "models": {
+    "patient_flow": {
+      "admission_model": "hgb",
+      "admission_test": {
+        "chosen_model": {
+          "auc_roc": 0.8445512030308833,
+          "brier": 0.08148647189678482,
+          "ci95": {
+            "auc_roc": [
+              0.7901145854539663,
+              0.8782887902436433
+            ],
+            "brier": [
+              0.05374123092478529,
+              0.11677578900303769
+            ],
+            "ece": [
+              0.019512212226994213,
+              0.05868178754215308
+            ],
+            "pr_auc": [
+              0.27337323672278946,
+              0.5073418654876629
+            ]
+          },
+          "ece": 0.02508889824995742,
+          "pr_auc": 0.39005617749902755
+        },
+        "baseline_triage_only": {
+          "auc_roc": 0.7318082394912169,
+          "brier": 0.09044623731664271,
+          "ci95": {
+            "auc_roc": [
+              0.6511271342677035,
+              0.7877410775996071
+            ],
+            "brier": [
+              0.05703525568410638,
+              0.12959652254616225
+            ],
+            "ece": [
+              0.007875160464907388,
+              0.057023301196040266
+            ],
+            "pr_auc": [
+              0.14697420920340182,
+              0.3249344946110135
+            ]
+          },
+          "ece": 0.01295992375986487,
+          "pr_auc": 0.22826124045925253
+        }
+      },
+      "care_time_test": {
+        "ci95": {
+          "mae_log": [
+            0.6275832728180085,
+            0.7632608067858182
+          ],
+          "median_abs_error_log": [
+            0.47891480356012384,
+            0.6006435002201368
+          ],
+          "r2": [
+            0.09536909854969554,
+            0.24883205367778458
+          ]
+        },
+        "mae_log": 0.6762326390499029,
+        "median_abs_error_log": 0.5318222529575074,
+        "r2": 0.19265441629997704
+      },
+      "saved_files": {
+        "admission": "admission_xgboost.json",
+        "admission_note": "CV winner is HistGradientBoosting (cannot be saved portably); the saved file is the best portable candidate instead: xgb {'n_estimators': 120, 'learning_rate': 0.06, 'max_depth': 2, 'min_child_weight': 1.0, 'subsample': 0.9, 'reg_lambda': 5.0}",
+        "care_time": "care_time_xgboost.json",
+        "care_time_note": "CV winner is HistGradientBoosting (cannot be saved portably); the saved file is the best portable candidate instead: xgb {'n_estimators': 120, 'learning_rate': 0.06, 'max_depth': 2, 'min_child_weight': 1.0, 'subsample': 0.9, 'reg_lambda': 5.0}"
+      }
+    },
+    "early_warning": {
+      "headline_stage3_all_scenarios": {
+        "beds_full": {
+          "auc_roc": 0.93540507010296,
+          "auc_roc_hi": 0.9423051493620354,
+          "auc_roc_lo": 0.9285564852444819,
+          "brier": 0.08674327267537565,
+          "ece": 0.006792044628008925,
+          "false_alarm_snapshots_per_normal_day": 1.6066666666666667,
+          "median_lead_min": 210.0,
+          "pr_auc": 0.8513948338589257,
+          "recall_at_5pct_fpr": 0.8107353906762967,
+          "rule_recall_at_5pct_fpr": 0.6114576493762311
+        },
+        "lwbs": {
+          "auc_roc": 0.9683267834828798,
+          "auc_roc_hi": 0.9728417479436396,
+          "auc_roc_lo": 0.9635732694129813,
+          "brier": 0.0450028963095628,
+          "ece": 0.008655958256455619,
+          "false_alarm_snapshots_per_normal_day": 1.7733333333333334,
+          "median_lead_min": 235.97173197236327,
+          "pr_auc": 0.8869307843495334,
+          "recall_at_5pct_fpr": 0.8906334596643205,
+          "rule_recall_at_5pct_fpr": 0.784244721169464
+        },
+        "urgent_late": {
+          "auc_roc": 0.8556036455986236,
+          "auc_roc_hi": 0.8693890049710529,
+          "auc_roc_lo": 0.8399902220953172,
+          "brier": 0.11727167646217272,
+          "ece": 0.01674207783322237,
+          "false_alarm_snapshots_per_normal_day": 1.8,
+          "median_lead_min": 183.64296637432108,
+          "pr_auc": 0.6425307846927352,
+          "recall_at_5pct_fpr": 0.7633868161608351,
+          "rule_recall_at_5pct_fpr": 0.43340421418905856
+        }
+      },
+      "caveat": "This model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, not validated on a real hospital."
+    }
+  },
+  "early_warning_example": {
+    "day": "heatwave, Large hospital, 14:00",
+    "risk_urgent_late": 0.7927810189725695,
+    "risk_beds_full": 0.9225038290023804,
+    "risk_lwbs": 0.9682621718157179,
+    "breaks_first": "patients leaving without being seen",
+    "alarm": true,
+    "message": "Watch patients leaving without being seen: chance 97% in the next 4 hours (alarm line 14%). Simulation-based early warning, not validated on a real hospital.",
+    "available": true
+  },
+  "linuxone": "No LinuxONE run recorded yet",
+  "local_run_not_linuxone": {
+    "uname_m": "AMD64",
+    "nproc": 8,
+    "python": "3.12.0",
+    "total_seconds": 434.0,
+    "parallel_timing": [
+      {
+        "workers": 1,
+        "seconds": 11.23,
+        "days": 800,
+        "speedup_vs_1_worker": 1.0
+      },
+      {
+        "workers": 2,
+        "seconds": 7.43,
+        "days": 800,
+        "speedup_vs_1_worker": 1.51
+      },
+      {
+        "workers": 4,
+        "seconds": 5.85,
+        "days": 800,
+        "speedup_vs_1_worker": 1.92
+      },
+      {
+        "workers": 8,
+        "seconds": 5.29,
+        "days": 800,
+        "speedup_vs_1_worker": 2.12
+      }
+    ]
+  },
+  "limits": [
+    "Triage missing in 25.9% of 2022 visits; only 139 level-1 visits; national sample, not one hospital.",
+    "Care time LOV-WAITTIME is a proxy, not service time. ATS time targets applied to NHAMCS triage levels are an assumption.",
+    "Simulated urgent median wait is lower than the survey's (see calibration).",
+    "Hospital sizes, consult times, patience, fast-track effect and plan costs are assumptions."
+  ]
+}

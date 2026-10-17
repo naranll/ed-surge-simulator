@@ -1,0 +1,248 @@
+{
+ "tag": "DATA",
+ "source": "NHAMCS 2022 official public-use file, PATWT-weighted, valid triage 1-5 rows",
+ "age_bands": [
+  "0-17",
+  "18-44",
+  "45-64",
+  "65+"
+ ],
+ "shrinkage_k": 10.0,
+ "note": "Admission chance by triage level x age band. Cells are blended toward the triage-level rate (shrinkage k=10, an ASSUMPTION) because some cells are small. 'n' is the unweighted count. Care time is LOV - WAITTIME, a proxy that includes tests and boarding, NOT pure service time.",
+ "admission": {
+  "1": {
+   "triage_rate": 0.47944,
+   "n": 132,
+   "bands": {
+    "0-17": {
+     "rate_raw": 0.04948,
+     "rate": 0.25422,
+     "n": 11
+    },
+    "18-44": {
+     "rate_raw": 0.53252,
+     "rate": 0.52169,
+     "n": 39
+    },
+    "45-64": {
+     "rate_raw": 0.32705,
+     "rate": 0.36421,
+     "n": 31
+    },
+    "65+": {
+     "rate_raw": 0.60465,
+     "rate": 0.58413,
+     "n": 51
+    }
+   }
+  },
+  "2": {
+   "triage_rate": 0.30219,
+   "n": 1584,
+   "bands": {
+    "0-17": {
+     "rate_raw": 0.18866,
+     "rate": 0.19409,
+     "n": 199
+    },
+    "18-44": {
+     "rate_raw": 0.14346,
+     "rate": 0.14692,
+     "n": 449
+    },
+    "45-64": {
+     "rate_raw": 0.33693,
+     "rate": 0.33617,
+     "n": 447
+    },
+    "65+": {
+     "rate_raw": 0.44177,
+     "rate": 0.43897,
+     "n": 489
+    }
+   }
+  },
+  "3": {
+   "triage_rate": 0.12342,
+   "n": 5298,
+   "bands": {
+    "0-17": {
+     "rate_raw": 0.04335,
+     "rate": 0.04429,
+     "n": 841
+    },
+    "18-44": {
+     "rate_raw": 0.06188,
+     "rate": 0.06221,
+     "n": 1874
+    },
+    "45-64": {
+     "rate_raw": 0.1281,
+     "rate": 0.12807,
+     "n": 1357
+    },
+    "65+": {
+     "rate_raw": 0.2483,
+     "rate": 0.24729,
+     "n": 1226
+    }
+   }
+  },
+  "4": {
+   "triage_rate": 0.01774,
+   "n": 2806,
+   "bands": {
+    "0-17": {
+     "rate_raw": 0.00592,
+     "rate": 0.00605,
+     "n": 887
+    },
+    "18-44": {
+     "rate_raw": 0.00604,
+     "rate": 0.00614,
+     "n": 1120
+    },
+    "45-64": {
+     "rate_raw": 0.04434,
+     "rate": 0.04385,
+     "n": 535
+    },
+    "65+": {
+     "rate_raw": 0.05464,
+     "rate": 0.05329,
+     "n": 264
+    }
+   }
+  },
+  "5": {
+   "triage_rate": 0.03549,
+   "n": 305,
+   "bands": {
+    "0-17": {
+     "rate_raw": 0.06888,
+     "rate": 0.06567,
+     "n": 94
+    },
+    "18-44": {
+     "rate_raw": 0.0,
+     "rate": 0.00293,
+     "n": 111
+    },
+    "45-64": {
+     "rate_raw": 0.02703,
+     "rate": 0.02831,
+     "n": 56
+    },
+    "65+": {
+     "rate_raw": 0.05463,
+     "rate": 0.05109,
+     "n": 44
+    }
+   }
+  }
+ },
+ "age_share_given_triage": {
+  "1": {
+   "0-17": 0.05407,
+   "18-44": 0.25166,
+   "45-64": 0.27754,
+   "65+": 0.41673
+  },
+  "2": {
+   "0-17": 0.10172,
+   "18-44": 0.27852,
+   "45-64": 0.29325,
+   "65+": 0.32651
+  },
+  "3": {
+   "0-17": 0.14728,
+   "18-44": 0.35089,
+   "45-64": 0.24363,
+   "65+": 0.2582
+  },
+  "4": {
+   "0-17": 0.31915,
+   "18-44": 0.4001,
+   "45-64": 0.18473,
+   "65+": 0.09602
+  },
+  "5": {
+   "0-17": 0.31513,
+   "18-44": 0.3472,
+   "45-64": 0.16898,
+   "65+": 0.16868
+  }
+ },
+ "care_time_log": {
+  "1_discharged": {
+   "mu": 5.4631,
+   "sigma": 1.0423,
+   "median_min": 232.0,
+   "n": 57
+  },
+  "1_admitted": {
+   "mu": 6.0417,
+   "sigma": 1.0795,
+   "median_min": 368.0,
+   "n": 51
+  },
+  "2_discharged": {
+   "mu": 5.5226,
+   "sigma": 0.8677,
+   "median_min": 243.0,
+   "n": 857
+  },
+  "2_admitted": {
+   "mu": 5.7284,
+   "sigma": 0.9141,
+   "median_min": 299.0,
+   "n": 471
+  },
+  "3_discharged": {
+   "mu": 5.1067,
+   "sigma": 0.8133,
+   "median_min": 174.0,
+   "n": 3864
+  },
+  "3_admitted": {
+   "mu": 5.7398,
+   "sigma": 0.8259,
+   "median_min": 318.0,
+   "n": 620
+  },
+  "4_discharged": {
+   "mu": 4.4459,
+   "sigma": 0.9248,
+   "median_min": 89.0,
+   "n": 2314
+  },
+  "4_admitted": {
+   "mu": 6.0079,
+   "sigma": 0.7662,
+   "median_min": 368.0,
+   "n": 51
+  },
+  "5_discharged": {
+   "mu": 4.2399,
+   "sigma": 1.2096,
+   "median_min": 68.0,
+   "n": 254
+  },
+  "5_admitted": {
+   "mu": 5.3771,
+   "sigma": 0.7471,
+   "median_min": 224.0,
+   "n": 8
+  }
+ },
+ "overall_admission_rate_weighted": 0.12234,
+ "real_targets_for_calibration": {
+  "tag": "DATA",
+  "source": "NHAMCS 2022, PATWT-weighted",
+  "urgent_levels_1_3_median_wait_min": 15.0,
+  "urgent_n": 5991,
+  "lwbs_share_weighted": 0.01889,
+  "lwbs_share_unweighted": 0.02041,
+  "note": "WAITTIME is the time from arrival to first provider contact as recorded by the survey. The simulator's door-to-doctor wait is the closest equivalent. 17.2% of visits have no WAITTIME; LWBS here is the survey's LWBS flag over all 16,025 visits."
+ }
+}

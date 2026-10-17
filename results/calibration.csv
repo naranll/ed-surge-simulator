@@ -1,0 +1,14 @@
+quantity,real_NHAMCS_2022,simulated_normal_day,note
+"urgent (levels 1-3) median wait, min",15.0,5.1,NHAMCS WAITTIME vs simulated door-to-doctor
+"left without being seen, %",1.89,1.59,NHAMCS LWBS flag vs simulated (patience is a fixed 180 min ASSUMPTION)
+"admitted to hospital, % of triaged visits",12.24,11.9,ADMITHOS vs simulated admission draw
+"peak bed occupancy, % (design target, not data)",,86.44,ASSUMPTION: keep under 95% on a normal day
+"peak arrival hour share, % (10:00)",6.43,6.21,NHAMCS ARRTIME vs simulated arrivals
+"quietest arrival hour share, % (05:00)",1.71,1.47,NHAMCS ARRTIME vs simulated arrivals
+"median care time level 1, min",332.0,338.55,LOV-WAITTIME (proxy) vs simulated consult + bed stay
+"median care time level 2, min",257.0,250.42,LOV-WAITTIME (proxy) vs simulated consult + bed stay
+"median care time level 3, min",186.0,173.66,LOV-WAITTIME (proxy) vs simulated consult + bed stay
+"median care time level 4, min",91.0,85.7,LOV-WAITTIME (proxy) vs simulated consult + bed stay
+"median care time level 5, min",70.0,76.42,LOV-WAITTIME (proxy) vs simulated consult + bed stay
+
+chosen capacity (ASSUMPTION set by calibration),beds=60,doctors=4,triage nurses=3; 30 simulated days

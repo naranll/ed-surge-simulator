@@ -1,0 +1,4 @@
+scenario,hospital,days,patients_per_day,urgent_late_pct,lwbs_pct,peak_bed_occupancy_pct,longest_queue,ms_per_simulated_day,recommended_plan,plan_search_seconds
+normal,Large,50,200.9,13.75,1.89,87.1,13.5,6.62,Do nothing,39.9
+heatwave,Large,50,219.5,26.73,6.78,96.0,21.2,14.93,"12:00-18:00 +1 clinician, fast track",46.3
+hurricane,Large,50,222.7,22.31,5.25,94.9,19.2,12.48,12:00-18:00 +1 clinician,50.2
