@@ -1,0 +1,21 @@
+Scenario: heatwave   (surge known in advance: True, from day_before, window (12, 20), burst possible: False)
+Look-ahead seeds: 50   Truth seeds: 50   Plans tested: 78   Mode: full
+Look-ahead pick : 12:00-18:00 +1 clinician, fast track
+RECOMMENDED     : 12:00-18:00 +1 clinician, fast track
+Why             : Recommended: paired gain +12.77 points (95% range +8.82 to +16.71) on 50 truth days, fairness limit holds.
+Truth check     : urgent on time 73.3% -> 87.3%, non-urgent median wait 65.8 -> 15.7 min (-76%), LWBS 15.4 -> 3.3
+
+Plan                                                 OnTime%  NU wait NU chg%  LWBS StaffH  Cost$   Score  Gain vs nothing (95%) Fair  Flag
+12:00-18:00 +1 clinician, fast track                    90.3     12.7     -80   1.7      6   1050    82.1    +8.8 +5.7..+11.9   yes  RECOMMENDED
+12:00-18:00 +1 clinician                                89.5     16.8     -74   2.3      6    900    82.0    +8.8 +5.9..+11.6   yes  
+12:00-18:00 +1 clinician, boarding -25%                 89.9     16.1     -75   2.2      6   1150    80.7    +7.5 +4.5..+10.4   yes  
+12:00-18:00 +1 clinician, fast track, boarding -25%     90.6     12.0     -81   1.7      6   1300    80.6    +7.3 +4.1..+10.5   yes  
+12:00-18:00 +1 clinician, fast track, boarding -50%     90.8     10.9     -83   1.6      6   1550    79.1    +5.9 +2.5..+9.2    yes  
+12:00-18:00 +1 clinician, boarding -50%                 90.1     16.0     -75   2.3      6   1400    79.1    +5.8 +2.8..+8.8    yes  
+15:00-21:00 +1 clinician                                87.2     23.1     -64   4.6      6    900    78.6    +5.4 +2.9..+7.9    yes  
+15:00-21:00 +1 clinician, fast track                    87.9     15.6     -76   4.3      6   1050    78.4    +5.1 +2.5..+7.7    yes  
+09:00-15:00 +1 clinician, fast track                    87.8     13.9     -78   4.2      6   1050    78.3    +5.0 +2.1..+8.0    yes  
+09:00-15:00 +1 clinician                                86.8     19.2     -70   4.7      6    900    78.2    +4.9 +2.1..+7.7    yes  
+Do nothing                                              79.2     64.4      +0  11.8      0      0    73.3    +0.0 +0.0..+0.0    yes  
+(11 of 78 plans shown; use --top 0 to show all)
+Gain = score points over do nothing (1 point = 1 percentage point of urgent patients seen on time, after cost and LWBS penalties).

@@ -103,9 +103,12 @@ class SimResult:
 
 class EDSim:
     def __init__(self, nurses: int = CAPACITY["nurses"], docs: int = CAPACITY["docs"],
-                 beds: int = CAPACITY["beds"], sample_dt: float = 15.0):
+                 beds: int = CAPACITY["beds"], sample_dt: float = 15.0, per_patient_stay: bool = False):
         if sample_dt <= 0:
             raise ValueError("sample_dt must be positive")
+        # ADDED 2026-10-18 (patient-flow link, default OFF = old behaviour): when True, a DISCHARGED patient
+        # keeps the bed for their own p.hold minutes instead of the flat TURNAROUND constant.
+        self.per_patient_stay = per_patient_stay
         self.now = 0.0
         self.cap = {"n": nurses, "d": docs, "b": beds}
         self.busy = {"n": 0, "d": 0, "b": 0}
@@ -203,7 +206,10 @@ class EDSim:
             b["d"] -= 1
             p = self.pat[ref]
             self._set(p, "board")
-            stay = p.hold * (EXPEDITE_FACTOR if now < self.ex_until else 1.0) if p.admit else TURNAROUND
+            if p.admit:
+                stay = p.hold * (EXPEDITE_FACTOR if now < self.ex_until else 1.0)
+            else:   # ADDED 2026-10-18: per-patient stay only when the flag is on; otherwise the old constant
+                stay = p.hold if self.per_patient_stay else TURNAROUND
             p.t_due = now + stay
             self._push(p.t_due, DEPART, ref)
         elif kind == DEPART:

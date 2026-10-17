@@ -1,0 +1,20 @@
+Scenario: normal   (surge known in advance: False, from n/a, window None, burst possible: False)
+Look-ahead seeds: 50   Truth seeds: 50   Plans tested: 78   Mode: full
+Look-ahead pick : 09:00-15:00 fast track
+RECOMMENDED     : Do nothing
+Why             : Do nothing: the 95% range of the gain of '09:00-15:00 fast track' on the truth days (+0.26 to +1.90) does not stay above 2 points.
+Truth check     : urgent on time 86.2% -> 88.0%, non-urgent median wait 19.7 -> 15.4 min (-22%), LWBS 4.0 -> 3.1
+
+Plan                                                 OnTime%  NU wait NU chg%  LWBS StaffH  Cost$   Score  Gain vs nothing (95%) Fair  Flag
+09:00-15:00 fast track                                  90.8     11.7     -23   2.0      0    150    88.7    +0.3 -0.3..+0.8    yes  look-ahead pick
+12:00-18:00 fast track                                  90.7     12.1     -20   2.2      0    150    88.6    +0.2 -0.4..+0.7    yes  
+12:00-18:00 +1 clinician                                94.9      6.3     -59   0.2      6    900    88.5    +0.1 -2.0..+2.1    yes  
+Do nothing                                              89.9     15.1      +0   2.8      0      0    88.4    +0.0 +0.0..+0.0    yes  RECOMMENDED
+09:00-15:00 +1 clinician                                94.6      5.2     -66   0.5      6    900    88.1    -0.4 -2.4..+1.6    yes  
+15:00-21:00 fast track                                  90.3     11.8     -22   2.6      0    150    88.0    -0.4 -0.8..-0.0    yes  
+06:00-12:00 fast track                                  90.2     12.6     -17   2.4      0    150    87.9    -0.5 -0.9..-0.2    yes  
+18:00-24:00 fast track                                  90.2     12.4     -18   2.7      0    150    87.8    -0.7 -1.0..-0.4    yes  
+12:00-18:00 +1 clinician, fast track                    95.1      5.7     -63   0.1      6   1050    87.7    -0.8 -2.9..+1.4    yes  
+03:00-09:00 fast track                                  90.0     14.7      -3   2.8      0    150    87.6    -0.9 -1.1..-0.7    yes  
+(10 of 78 plans shown; use --top 0 to show all)
+Gain = score points over do nothing (1 point = 1 percentage point of urgent patients seen on time, after cost and LWBS penalties).
