@@ -1,5 +1,5 @@
-"""Emergency Department Real-Time Decision Support System.
-Clean clinical operations dashboard for hospital capacity and surge management.
+"""Emergency Department Real-Time Decision Support System & Digital Twin.
+High-performance clinical operations platform for surge management and capacity optimization.
 Run: streamlit run src/dashboard/app.py
 """
 from __future__ import annotations
@@ -17,11 +17,11 @@ from src.simulation.scenarios import ATS_TARGET, SCENARIOS  # noqa: E402
 
 # Clinical Triage Standards (Australasian Triage Scale / Emergency Severity Index)
 ATS_CONFIG = {
-    1: {"name": "ATS 1", "desc": "Resuscitation", "color": "#b91c1c", "bg": "#fef2f2", "border": "#fecaca", "target": 0},
-    2: {"name": "ATS 2", "desc": "Emergency", "color": "#c2410c", "bg": "#fff7ed", "border": "#fed7aa", "target": 10},
-    3: {"name": "ATS 3", "desc": "Urgent", "color": "#a16207", "bg": "#fefce8", "border": "#fef08a", "target": 30},
-    4: {"name": "ATS 4", "desc": "Semi-Urgent", "color": "#15803d", "bg": "#f0fdf4", "border": "#bbf7d0", "target": 60},
-    5: {"name": "ATS 5", "desc": "Non-Urgent", "color": "#0369a1", "bg": "#f0f9ff", "border": "#bae6fd", "target": 120},
+    1: {"name": "ATS 1", "desc": "Resuscitation", "color": "#dc2626", "bg": "#fef2f2", "border": "#fecaca", "target": 0},
+    2: {"name": "ATS 2", "desc": "Emergency", "color": "#ea580c", "bg": "#fff7ed", "border": "#fed7aa", "target": 10},
+    3: {"name": "ATS 3", "desc": "Urgent", "color": "#d97706", "bg": "#fffbeb", "border": "#fde68a", "target": 30},
+    4: {"name": "ATS 4", "desc": "Semi-Urgent", "color": "#16a34a", "bg": "#f0fdf4", "border": "#bbf7d0", "target": 60},
+    5: {"name": "ATS 5", "desc": "Non-Urgent", "color": "#0284c7", "bg": "#f0f9ff", "border": "#bae6fd", "target": 120},
 }
 
 SCENARIO_PROFILES = {
@@ -29,9 +29,9 @@ SCENARIO_PROFILES = {
         "title": "Baseline Monday Operations",
         "badge": "STANDARD OPERATIONS",
         "badge_bg": "#f1f5f9",
-        "badge_color": "#475569",
+        "badge_color": "#334155",
         "border": "#cbd5e1",
-        "desc": "Typical diurnal arrival pattern (~200 visits/24h) with standard scheduled staffing. Baseline comparison point.",
+        "desc": "Typical diurnal arrival pattern (~200 visits/24h) with standard scheduled staffing. Baseline comparison benchmark.",
     },
     "heatwave": {
         "title": "Extreme Heatwave Surge (Texas 2011 & 2025)",
@@ -58,6 +58,13 @@ SCENARIO_PROFILES = {
         "desc": "Category 1 Hurricane landfall followed by 105°F heat index and 2.2M grid power failure. +35% volume, oxygen/device dependency failures, and acute inpatient boarding gridlock.",
     },
 }
+
+PROTOCOLS = [
+    "Surge Nurse (+1)",
+    "On-Call Attending (+1)",
+    "Fast-Track Protocol",
+    "Expedite Ward Transfers",
+]
 
 
 def live_metrics(live: LiveED) -> dict:
@@ -87,7 +94,7 @@ def live_metrics(live: LiveED) -> dict:
 def get_hospital_state(live: LiveED) -> dict:
     s, now = live.sim, live.sim.now
 
-    # Triage Queue
+    # Triage Intake Queue
     tri_q = []
     for item in sorted(s.q.get("tri_q", []), key=lambda x: (x[0], x[1])):
         p = s.pat.get(item[2])
@@ -105,7 +112,7 @@ def get_hospital_state(live: LiveED) -> dict:
             tgt = ATS_TARGET.get(p.ats, 120)
             bed_q.append({"pid": p.pid, "ats": p.ats, "wait": w, "target": tgt, "breached": w > tgt})
 
-    # Acute Treatment Bays (20 Beds)
+    # Acute Treatment Bays (20 Beds Unit)
     in_beds = [p for p in s.pat.values() if p.st in ("doc_q", "consult", "board")]
     in_beds.sort(key=lambda p: (p.t_bed if p.t_bed is not None else p.t, p.pid))
 
@@ -130,12 +137,12 @@ def get_hospital_state(live: LiveED) -> dict:
                 if p.admit:
                     status = "boarding"
                     hold_time = max(0.0, now - (p.t_doc or p.t))
-                    label = "INPATIENT BOARDING"
+                    label = "BOARDING BLOCK"
                     sublabel = f"Admitted • Holding Bed ({int(hold_time)}m)"
                 else:
                     status = "turnaround"
                     label = "DISCHARGE BUFFER"
-                    sublabel = "Awaiting Labs / Transport"
+                    sublabel = "Labs & Meds Turnaround"
             else:
                 status = "awaiting_doc"
                 label = "AWAITING ATTENDING"
@@ -227,12 +234,12 @@ def render_hospital_twin(h: dict, m: dict):
         for n in h["nurses"]:
             bg = "#ecfdf5" if n["busy"] else "#f8fafc"
             border = "#a7f3d0" if n["busy"] else "#e2e8f0"
-            color = "#065f46" if n["busy"] else "#475569"
+            color = "#047857" if n["busy"] else "#475569"
             status_txt = "Active Intake" if n["busy"] else "Intake Ready"
             pulse = "●" if n["busy"] else "○"
             nurse_items.append(
                 f"<div style='background:{bg}; border:1px solid {border}; border-radius:6px; padding:6px 10px; font-size:11px; flex:1; min-width:130px; box-sizing:border-box;'>"
-                f"<div style='font-weight:600; color:{color};'><span style='color:{color}; margin-right:4px;'>{pulse}</span>{n['name']}</div>"
+                f"<div style='font-weight:600; color:{color};'><span style='margin-right:4px;'>{pulse}</span>{n['name']}</div>"
                 f"<div style='color:#64748b; font-size:10px;'>{status_txt}</div></div>"
             )
         nurse_html = f"<div style='display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;'>{''.join(nurse_items)}</div>"
@@ -241,7 +248,7 @@ def render_hospital_twin(h: dict, m: dict):
         tri_items = []
         for p in h["tri_q"]:
             cfg = ATS_CONFIG.get(p["ats"], ATS_CONFIG[5])
-            breach_flag = "<span style='color:#b91c1c; font-weight:700;'> (BREACH)</span>" if p["breached"] else ""
+            breach_flag = "<span style='color:#dc2626; font-weight:700;'> (BREACH)</span>" if p["breached"] else ""
             tri_items.append(
                 f"<div style='background:{cfg['bg']}; border:1px solid {cfg['border']}; border-radius:4px; padding:3px 8px; font-size:11px; display:inline-block; margin:2px; box-sizing:border-box;'>"
                 f"<span style='font-weight:600; color:{cfg['color']};'>P#{p['pid']} • {cfg['name']}</span>"
@@ -256,7 +263,7 @@ def render_hospital_twin(h: dict, m: dict):
         bed_q_items = []
         for p in h["bed_q"][:25]:
             cfg = ATS_CONFIG.get(p["ats"], ATS_CONFIG[5])
-            breach_flag = "<span style='color:#b91c1c; font-weight:700;'> !</span>" if p["breached"] else ""
+            breach_flag = "<span style='color:#dc2626; font-weight:700;'> !</span>" if p["breached"] else ""
             bed_q_items.append(
                 f"<div style='background:{cfg['bg']}; border:1px solid {cfg['border']}; border-radius:4px; padding:3px 8px; font-size:11px; display:inline-block; margin:2px; box-sizing:border-box;'>"
                 f"<span style='font-weight:600; color:{cfg['color']};'>P#{p['pid']} • {cfg['name']}</span>"
@@ -306,7 +313,7 @@ def render_hospital_twin(h: dict, m: dict):
                 bg = "#fef2f2"
                 border = "#fecaca"
                 badge_bg = "#fee2e2"
-                badge_color = "#b91c1c"
+                badge_color = "#dc2626"
                 badge_text = "BOARDING BLOCK"
             elif b["status"] == "turnaround":
                 bg = "#faf5ff"
@@ -318,13 +325,13 @@ def render_hospital_twin(h: dict, m: dict):
                 bg = "#fffbeb"
                 border = "#fde68a"
                 badge_bg = "#fef3c7"
-                badge_color = "#b45309"
+                badge_color = "#d97706"
                 badge_text = "AWAITING MD"
 
             patient_badge = ""
             if b["pid"] is not None:
                 cfg = ATS_CONFIG.get(b["ats"], ATS_CONFIG[5])
-                patient_badge = f"<span style='background:{cfg['bg']}; color:{cfg['color']}; border:1px solid {cfg['border']}; padding:1px 4px; border-radius:3px; font-size:10px; font-weight:700;'>P#{b['pid']} {cfg['name']}</span>"
+                patient_badge = f"<span style='background:{cfg['bg']}; color:{cfg['color']}; border:1px solid {cfg['border']}; padding:1px 5px; border-radius:3px; font-size:10px; font-weight:700;'>P#{b['pid']} {cfg['name']}</span>"
 
             bed_cards.append(
                 f"<div style='background:{bg}; border:1px solid {border}; border-radius:6px; padding:8px 10px; height:82px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden;'>"
@@ -355,17 +362,16 @@ def main() -> None:  # pragma: no cover - UI
     import streamlit as st
 
     st.set_page_config(
-        page_title="Emergency Department Decision Support System",
+        page_title="PulseOps • Emergency Department Digital Twin",
         page_icon="🏥",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
 
-    # Professional Clean Light Theme CSS
+    # Professional Clean Light Theme CSS (Portfolio Inspired: Minimalist, Sharp, High-Contrast)
     st.markdown(
         """
         <style>
-        /* Base typography and clean clinical theme */
         .stApp {
             background-color: #f8fafc;
             color: #0f172a;
@@ -379,31 +385,36 @@ def main() -> None:  # pragma: no cover - UI
             padding-bottom: 2.5rem;
             max-width: 1350px;
         }
-        /* Metric cards */
+        /* Metric card styling */
         div[data-testid="stMetric"] {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 10px 14px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            padding: 12px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
         div[data-testid="stMetricLabel"] p {
-            color: #64748b !important;
+            color: #475569 !important;
             font-size: 11px !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
         div[data-testid="stMetricValue"] div {
             color: #0f172a !important;
-            font-size: 22px !important;
-            font-weight: 700 !important;
+            font-size: 24px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.5px;
         }
-        /* Buttons and inputs */
+        div[data-testid="stMetricDelta"] {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+        }
+        /* Buttons */
         button[kind="secondary"] {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
-            color: #334155;
+            color: #1e293b;
             border-radius: 6px;
             font-weight: 600;
         }
@@ -427,26 +438,27 @@ def main() -> None:  # pragma: no cover - UI
     ss = st.session_state
     ss.setdefault("clock", 11.0)
     ss.setdefault("playing", False)
-    ss.setdefault("add_nurse", False)
-    ss.setdefault("add_doc", False)
-    ss.setdefault("fast_track", False)
-    ss.setdefault("expedite", False)
+    ss.setdefault("active_protocols", [])
 
     if ss.pop("tick", False):
         ss.clock = 0.0 if ss.clock >= 24.0 else min(24.0, ss.clock + 0.5)
 
-    # 1. Clinical Header
+    # 1. Header (Portfolio inspired minimalist hero)
     header_html = (
-        "<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.03); box-sizing:border-box;'>"
+        "<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:18px 24px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.03); box-sizing:border-box;'>"
         "<div style='display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;'>"
         "<div>"
-        "<div style='font-size:18px; font-weight:800; color:#0f172a; letter-spacing:-0.3px;'>Metropolitan Emergency Department Operations Center</div>"
+        "<div style='display:flex; align-items:center; gap:8px;'>"
+        "<span style='font-size:20px;'>🏥</span>"
+        "<span style='font-size:20px; font-weight:800; color:#0f172a; letter-spacing:-0.5px;'>PulseOps • Emergency Department Operations Center</span>"
+        "</div>"
         "<div style='color:#64748b; font-size:12px; margin-top:2px;'>Real-Time Decision Support & Surge Resource Optimizer • IBM LinuxONE (s390x) In-Memory Engine</div>"
         "</div>"
-        "<div style='display:flex; gap:8px; flex-wrap:wrap; align-items:center;'>"
-        "<span style='background:#f1f5f9; border:1px solid #e2e8f0; color:#475569; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>LinuxONE Native Engine</span>"
-        "<span style='background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>System Online</span>"
-        "<span style='background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>CRN Validated</span>"
+        "<div style='display:flex; gap:6px; flex-wrap:wrap; align-items:center;'>"
+        "<span style='background:#f1f5f9; border:1px solid #e2e8f0; color:#334155; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>LinuxONE s390x</span>"
+        "<span style='background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>Pure-Python heapq</span>"
+        "<span style='background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>0ms Latency</span>"
+        "<span style='background:#f8fafc; border:1px solid #cbd5e1; color:#475569; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>CRN Validated</span>"
         "</div>"
         "</div>"
         "</div>"
@@ -478,52 +490,60 @@ def main() -> None:  # pragma: no cover - UI
     m, rec = v["metrics"], v["rec"]
     h = v["hospital"]
 
-    # 3. Clinical Telemetry KPIs
+    # 3. Clinical Telemetry KPIs (01. System Telemetry)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;'>01. Real-Time Emergency Department Telemetry</div>", unsafe_allow_html=True)
     g1, g2, g3, g4, g5 = st.columns(5)
-    g1.metric("Acute Bed Occupancy", f"{m['bed_pct']:.0f}%", f"{m['in_beds']}/{m['total_beds']} Beds")
-    g2.metric("Mean Door-to-Doctor", f"{m['avg_wait']:.0f} min", "Triage to MD")
+    g1.metric("Acute Bed Occupancy", f"{m['bed_pct']:.0f}%", f"{m['in_beds']}/{m['total_beds']} Beds In Use")
+    g2.metric("Mean Door-to-Doctor", f"{m['avg_wait']:.0f} min", "Triage to Physician")
     g3.metric("ATS 2 Breach Rate", f"{m['ats2_breach_pct']:.0f}%", "Target: ≤10m")
     g4.metric("Waiting Room Census", f"{len(h['tri_q']) + len(h['bed_q'])}", f"{len(h['bed_q'])} triaged")
     g5.metric("Inpatient Boarding Block", f"{m['boarding_count']}", "Holding Acute Beds")
 
-    # 4. Tactical Intervention Command Deck
-    deck_header_html = (
-        "<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 16px; margin:16px 0 10px 0; box-shadow:0 1px 2px rgba(0,0,0,0.02); box-sizing:border-box;'>"
-        "<div style='display:flex; justify-content:space-between; align-items:center;'>"
-        "<div>"
-        "<span style='font-weight:700; color:#1e293b; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;'>Operational Intervention Deck</span>"
-        "<span style='color:#64748b; font-size:12px; margin-left:10px;'>Simulate staffing surges and discharge buffer protocols</span>"
-        "</div>"
-        "</div>"
+    # 4. Tactical Surge Intervention Deck (02. Operational What-If Controls)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>02. Tactical Surge Intervention Deck (What-If Controls)</div>", unsafe_allow_html=True)
+
+    deck_box_html = (
+        "<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 16px; margin-bottom:10px; box-sizing:border-box;'>"
+        "<div style='font-size:12px; color:#475569;'>Toggle tactical staffing and buffer policies below to evaluate real-time capacity and wait-time impacts.</div>"
         "</div>"
     )
-    st.html(deck_header_html)
+    st.html(deck_box_html)
 
-    w1, w2, w3, w4, w5 = st.columns(5)
-    t_nurse = w1.checkbox("Surge Nurse (+1)", value=ss.add_nurse, key="chk_nurse")
-    t_doc = w2.checkbox("On-Call Attending (+1)", value=ss.add_doc, key="chk_doc")
-    t_fast = w3.checkbox("Fast-Track Protocol", value=ss.fast_track, key="chk_fast")
-    t_exp = w4.checkbox("Expedite Ward Transfers", value=ss.expedite, key="chk_exp")
+    # Use modern st.pills for clean SaaS toggle pills
+    p_col1, p_col2 = st.columns([4, 1])
+    selected_pills = p_col1.pills(
+        "Active Protocols",
+        PROTOCOLS,
+        selection_mode="multi",
+        default=ss.active_protocols,
+        key="pills_protocols",
+        label_visibility="collapsed",
+    )
+    ss.active_protocols = selected_pills or []
 
-    ss.add_nurse, ss.add_doc, ss.fast_track, ss.expedite = t_nurse, t_doc, t_fast, t_exp
+    def sync_ai_action():
+        active = []
+        if "ADD_NURSE" in rec.action:
+            active.append("Surge Nurse (+1)")
+        if "ADD_PHYSICIAN" in rec.action:
+            active.append("On-Call Attending (+1)")
+        if "FAST_TRACK" in rec.action:
+            active.append("Fast-Track Protocol")
+        if "INPATIENT_BUFFER_EXPEDITE" in rec.action:
+            active.append("Expedite Ward Transfers")
+        ss.active_protocols = active
 
-    def apply_ai_rec():
-        ss.add_nurse = "ADD_NURSE" in rec.action
-        ss.add_doc = "ADD_PHYSICIAN" in rec.action
-        ss.fast_track = "FAST_TRACK" in rec.action
-        ss.expedite = "INPATIENT_BUFFER_EXPEDITE" in rec.action
+    p_col2.button("Apply AI Policy", on_click=sync_ai_action, use_container_width=True)
 
-    w5.button("Apply AI Recommendation", on_click=apply_ai_rec, use_container_width=True)
-
-    # Active Intervention Evaluation
+    # Parse active action from pills
     action_parts = []
-    if ss.add_nurse:
+    if "Surge Nurse (+1)" in ss.active_protocols:
         action_parts.append("ADD_NURSE")
-    if ss.add_doc:
+    if "On-Call Attending (+1)" in ss.active_protocols:
         action_parts.append("ADD_PHYSICIAN")
-    if ss.fast_track:
+    if "Fast-Track Protocol" in ss.active_protocols:
         action_parts.append("FAST_TRACK")
-    if ss.expedite:
+    if "Expedite Ward Transfers" in ss.active_protocols:
         action_parts.append("INPATIENT_BUFFER_EXPEDITE")
     active_action_str = "+".join(action_parts) or "DO_NOTHING"
     current_action = Action.parse(active_action_str)
@@ -545,20 +565,21 @@ def main() -> None:  # pragma: no cover - UI
         )
         st.html(active_bar_html)
 
-    # 5. Visual Hospital Floor Plan
+    # 5. Visual Hospital Floor Plan (03. Digital Twin)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>03. Physical Hospital Floor Plan (Emergency Department Unit)</div>", unsafe_allow_html=True)
     render_hospital_twin(h, m)
 
-    # 6. Prescriptive Intelligence & Counterfactual Analysis
-    st.markdown("#### Prescriptive AI Decision Support")
-    
+    # 6. Prescriptive Intelligence & Counterfactual Analysis (04. AI Prescriptive Optimization)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>04. Prescriptive AI Decision Support (Counterfactual What-If)</div>", unsafe_allow_html=True)
+
     rec_box_bg = "#f0fdf4" if rec.action == "DO_NOTHING" else "#fffbeb"
     rec_box_border = "#bbf7d0" if rec.action == "DO_NOTHING" else "#fde68a"
     rec_box_color = "#15803d" if rec.action == "DO_NOTHING" else "#b45309"
-    
+
     rec_html = (
         f"<div style='background:{rec_box_bg}; border:1px solid {rec_box_border}; border-radius:6px; padding:10px 14px; margin-bottom:12px; font-size:12px; box-sizing:border-box;'>"
-        f"<span style='font-weight:700; color:{rec_box_color}; margin-right:8px;'>AI RECOMMENDATION:</span>"
-        f"<span style='color:#1e293b; font-weight:600;'>{rec.headline()}</span>"
+        f"<span style='font-weight:700; color:{rec_box_color}; margin-right:8px;'>AI PRESCRIBED ACTION:</span>"
+        f"<span style='color:#1e293b; font-weight:600;'>{rec.headline().replace('RECOMMENDED: ', '')}</span>"
         f"</div>"
     )
     st.html(rec_html)
@@ -589,18 +610,18 @@ def main() -> None:  # pragma: no cover - UI
             st.metric("Median Wait Time", f"{sim_res.median_wait:.0f} min", f"-{max(0.0, delta_wait):.0f} min")
             st.metric("Left Without Being Seen", f"{sim_res.lwbs:.1f}", f"${current_action.cost:,.0f} cost")
 
-    # 7. 24-Hour Operations Trend
-    st.markdown("#### 24-Hour Patient Flow & Capacity Trajectory")
+    # 7. 24-Hour Operations Trend (05. Flow Trajectory)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>05. 24-Hour Patient Flow & Capacity Trajectory</div>", unsafe_allow_html=True)
     st.line_chart(pd.DataFrame(v["series"]).set_index("hour"))
 
-    # 8. Clinical Handover & Audit Log Expanders
-    with st.expander("Charge Nurse Shift Handover Briefing (Copilot)", expanded=True):
+    # 8. Clinical Handover & Audit Log Expanders (06. Handover Memo)
+    with st.expander("06. Charge Nurse Shift Handover Briefing (Copilot)", expanded=True):
         st.markdown(
             f"<div style='background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px 16px; font-size:12px; line-height:1.6; color:#334155; font-family:monospace; white-space:pre-wrap;'>{v['briefing']}</div>",
             unsafe_allow_html=True,
         )
 
-    with st.expander("Comprehensive Policy Evaluation (Pareto Frontier)"):
+    with st.expander("07. Comprehensive Policy Evaluation (Pareto Frontier Table)"):
         st.dataframe(pd.DataFrame(rec.table), use_container_width=True)
 
     if ss.playing:

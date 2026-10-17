@@ -120,7 +120,7 @@ def main(argv=None) -> int:
         step("calibration", [PY, "scripts/calibrate.py"] + (["--quick"] if a.quick else []))
         step("patient_flow_model", [PY, "scripts/train_patient_flow.py"] + (["--quick"] if a.quick else []))
     else:
-        log(f"\nSKIPPED patient_flow_model and calibration: {NHAMCS} not found (the cleaned data is not in git; copy it in, see LINUXONE_RUNBOOK.md)")
+        log(f"\nSKIPPED patient_flow_model and calibration: {NHAMCS} not found (the cleaned data is not in git")
         status["patient_flow_model"] = status["calibration"] = "skipped: data file missing"
     step("early_warning_model", [PY, "scripts/train_early_warning.py"] + (["--quick"] if a.quick else []))
     rec = {**env, "mode": "quick" if a.quick else "full", "finished": time.strftime("%Y-%m-%d %H:%M:%S"), "seconds_per_step": steps,
