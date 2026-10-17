@@ -1,0 +1,33 @@
+"""ED Surge Simulator CLI.  python run.py demo|rolling|dashboard"""
+import argparse
+import subprocess
+import sys
+
+from src.dashboard.app import compute_view
+from src.optimization.optimizer import rolling
+from src.simulation.ed_simulator import LiveED
+from src.simulation.scenarios import SCENARIOS
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("cmd", choices=["demo", "rolling", "dashboard"], nargs="?", default="demo")
+    ap.add_argument("--scenario", choices=list(SCENARIOS), default="compound")
+    ap.add_argument("--hour", type=float, default=14.0)
+    ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--workers", type=int, default=1)
+    a = ap.parse_args()
+    if a.cmd == "dashboard":
+        sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py"]))
+    if a.cmd == "demo":
+        v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers)
+        print(v["rec"].headline(), "\n\n" + v["briefing"])
+    else:
+        live, sc = LiveED(SCENARIOS[a.scenario], a.seed), SCENARIOS[a.scenario]
+        for r in rolling(live, sc, 0, 24 * 60, 30, workers=a.workers):
+            print(f"{int(r.t // 60):02d}:{int(r.t % 60):02d}  {r.action:<45} breach -{r.breach_reduction_pct:3.0f}%  "
+                  f"wait -{r.wait_reduction:4.0f}m  cost ${r.cost:,.0f}")
+
+
+if __name__ == "__main__":
+    main()
