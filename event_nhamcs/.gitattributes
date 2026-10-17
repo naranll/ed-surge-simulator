@@ -1,0 +1,2 @@
+# Preserve notebook bytes so submitted files match LinuxONE evidence hashes.
+*.ipynb -text
