@@ -9,6 +9,15 @@ This document lists the official sources intended for the ED Surge Simulator's i
 - **Purpose:** Visit-level national emergency department data for describing patient and visit characteristics used by the simulator.
 - **Preprocessing note:** `src/data_processing/nhamcs_preprocessing.py` implements Phase 2A for `IMMEDR`, `WAITTIME`, `LOV`, `ARRTIME`, `AGE`, and `ADISP`. Rules follow the 2022 ED codebook (items 3–6, 34, and 251; pages 32–33, 36, and 53). Variable-specific sentinel meanings are retained in missing-reason columns; Stata extended missing markers remain distinct. `AGE=0` means under one year and `AGE=94` means 94 or older (top-coded). `LOV` is ED visit duration; `LOS` remains hospital length of stay. Triage estimates use `PATWT`; design fields `CSTRATM` and `CPSUM` are required for weighted output, while variance estimates are outside this MVP. The public-use records must not be treated as Houston-specific patient data or joined directly to local weather or disaster events without valid geographic and temporal linkage.
 
+## Third-party processed NHAMCS 2018-2022 visits
+
+- **Local source:** `data/raw/nhamcs/nhamcs_data_2018_22.csv`
+- **Role:** Primary patient-profile input for relative arrival-pattern, triage-acuity, and patient-characteristic sampling in the simulation MVP.
+- **Provenance:** The file is a third-party transformation of NHAMCS data. Its creator, transformation code, exact yearly source files, and recoding decisions are not documented in this repository. It must not be represented as equivalent to the original CDC public-use files.
+- **Observed scope:** 58,124 rows covering 2018-2022. Records appear restricted to triage codes 1-5. The file has no survey weights, survey-design fields, hospital identifiers, complete arrival dates, service durations, ED length of visit, or hospital capacity.
+- **Preprocessing:** `src/data_processing/nhamcs_2018_22.py` retains all rows in source order, preserves important raw values, parses structurally valid HHMM arrival times, validates year/month/weekday/triage codes, preserves waiting-time extremes, and flags exact duplicates. It does not assign weekday names because the code mapping is unverified.
+- **Interpretation:** `wait_time_minutes` is retained as a waiting-time field and is not provider service time. Arrival distributions are unweighted sample patterns and are neither Houston-specific observed rates nor absolute ED volumes. Patient records are not joined directly to NOAA, FEMA, or HURDAT2 observations.
+
 ## NOAA GHCN-Daily weather
 
 - **Official data archive:** [NOAA NCEI GHCN-Daily](https://www.ncei.noaa.gov/pub/data/ghcn/daily/)

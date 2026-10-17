@@ -92,3 +92,36 @@ values, checks the synthetic unexpected-code case, and reproduces outputs in a
 temporary directory. Results are written to
 `reports/nhamcs_2022_validation_after_fixes.md` and its evidence JSON. The original
 validation report is retained as history. This check requires the local real data.
+
+## NHAMCS 2018-2022 simulation handoff
+
+The simulation team's primary patient-profile table is produced from the local,
+third-party processed CSV. Run from the repository root:
+
+```bash
+python src/data_processing/nhamcs_2018_22.py
+```
+
+This writes:
+
+- `data/processed/nhamcs_2018_22_simulation_visits.csv`
+- `reports/nhamcs_2018_22_preprocessing.json`
+
+The output preserves all input records and their original order. Important source
+values use `*_raw` columns; parsed values and explicit status fields are separate.
+Valid arrival times provide `arrival_hour` and `arrival_minute_of_day` for relative
+arrival-pattern estimation. `triage_acuity_code` supports empirical triage sampling,
+and the retained demographic and visit categories support patient-profile sampling.
+Use `year_clean` for year-stratified summaries.
+
+Do not assign weekday names from `day_of_week_code`: its 1-7 label mapping has not
+been verified. Do not use `wait_time_minutes_clean` as provider service time. The
+file has no survey weights, hospital identifiers, complete dates, service durations,
+or capacity measures, and it cannot establish absolute Houston ED arrival volumes.
+Exact duplicates remain present and are identified by `exact_duplicate_flag`.
+
+Run its focused tests with:
+
+```bash
+python -m unittest tests.test_nhamcs_2018_22 -v
+```
