@@ -207,8 +207,12 @@ class EDSim:
             p.t_due = now + stay
             self._push(p.t_due, DEPART, ref)
         elif kind == DEPART:
-            p = self.pat[ref]
-            if p.st != "board" or abs(p.t_due - now) > 1e-9:   # superseded by an expedite
+            # CHANGED 2026-10-17 (bug fix): an "expedite" leaves the patient's OLD departure event in
+            # the queue. If that patient was removed from self.pat by snapshot(prune=True) before the
+            # old event fired, self.pat[ref] raised KeyError and the whole run crashed. Using .get() and
+            # skipping a missing patient is safe: that patient had already left, so there is nothing to do.
+            p = self.pat.get(ref)
+            if p is None or p.st != "board" or abs(p.t_due - now) > 1e-9:   # gone, or superseded by an expedite
                 return
             b["b"] -= 1
             p.t_dep = now
