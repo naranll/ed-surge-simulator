@@ -8,10 +8,10 @@ Every number below comes from a file in this repo. Sources: NHAMCS 2022 (CDC pub
 - Care time (log, proxy LOV-WAITTIME): R-squared 0.19; error 0.676 vs baseline 0.694.
 
 ## Model 2 - early warning (simulated days; learns the simulator)
-- 750 day numbers x 4 scenario types, 120,000 snapshots; split by whole day (450/150/150).
-- beds_full: AUC 0.935; catches 81% of risky moments at 5% false alarms on normal days (simple rule: 61%).
-- lwbs: AUC 0.968; catches 89% of risky moments at 5% false alarms on normal days (simple rule: 78%).
-- urgent_late: AUC 0.856; catches 76% of risky moments at 5% false alarms on normal days (simple rule: 43%).
+- 750 day numbers x 4 scenario types, 150,000 snapshots; split by whole day (450/150/150).
+- beds_full: AUC 0.940; catches 87% of risky moments at 5% false alarms on normal days (simple rule: 61%).
+- lwbs: AUC 0.973; catches 92% of risky moments at 5% false alarms on normal days (simple rule: 79%).
+- urgent_late: AUC 0.874; catches 81% of risky moments at 5% false alarms on normal days (simple rule: 46%).
 
 ## Calibration (real vs simulated normal day)
 ```
@@ -33,10 +33,12 @@ chosen capacity (ASSUMPTION set by calibration),beds=60,doctors=4,triage nurses=
 
 ## Scenarios (reference hospital)
 ```
-scenario,hospital,days,patients_per_day,urgent_late_pct,lwbs_pct,peak_bed_occupancy_pct,longest_queue,ms_per_simulated_day,recommended_plan,plan_search_seconds
-normal,Large,50,200.9,13.75,1.89,87.1,13.5,6.62,Do nothing,39.9
-heatwave,Large,50,219.5,26.73,6.78,96.0,21.2,14.93,"12:00-18:00 +1 clinician, fast track",46.3
-hurricane,Large,50,222.7,22.31,5.25,94.9,19.2,12.48,12:00-18:00 +1 clinician,50.2
+scenario,hospital,days,patients_per_day,urgent_late_pct,lwbs_pct,peak_bed_occupancy_pct,longest_queue,ms_per_simulated_day,recommended_plan,plan_search_seconds,plan_search_replications
+normal,Large,50,200.9,13.75,1.89,87.1,13.5,10.09,Do nothing,12.6,50
+heatwave,Large,50,219.5,26.73,6.78,96.0,21.2,17.94,"12:00-18:00 +1 clinician, fast track",15.7,50
+hurricane,Large,50,222.7,22.31,5.25,94.9,19.2,19.51,12:00-18:00 +1 clinician,15.1,50
+hurricane_burst,Large,50,237.6,45.04,11.09,99.1,31.4,18.79,12:00-18:00 +1 clinician,14.1,50
+compound,Large,50,243.2,38.92,11.76,99.1,28,17.66,"12:00-18:00 +1 clinician, fast track",15.2,50
 ```
 
 ## Limits and honesty

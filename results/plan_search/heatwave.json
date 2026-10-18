@@ -10,7 +10,10 @@
    12,
    20
   ],
-  "burst_possible": false
+  "burst_possible": false,
+  "components": [
+   "heatwave"
+  ]
  },
  "selected": {
   "label": "12:00-18:00 +1 clinician, fast track",
@@ -2084,5 +2087,5 @@
   }
  ],
  "hospital": "Large",
- "seconds": 46.3
+ "seconds": 15.7
 }

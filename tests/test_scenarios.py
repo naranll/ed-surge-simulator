@@ -16,6 +16,7 @@ import json
 import logging
 import math
 import os
+import platform
 import random
 import re
 import sys
@@ -621,6 +622,9 @@ class LegacySwitchTests(unittest.TestCase):
                 self.assertEqual(got, want, label)
 
     @unittest.skipUnless(sys.version_info[:2] == (3, 12), "golden hashes were captured with Python 3.12")
+    @unittest.skipUnless(platform.machine().lower() in ("amd64", "x86_64"),
+                         "golden hashes were captured on x86-64; other CPUs (e.g. s390x) can differ in the last digit "
+                         "of libm results, which changes repr(). The frozen-reference test above checks exactness everywhere.")
     def test_arrivals_match_golden_hashes(self):
         for mod in (self.legacy, self.legacy_with_json):
             for label, (key, seed, kwargs) in GOLDEN_CASES.items():

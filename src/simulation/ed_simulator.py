@@ -119,6 +119,9 @@ class EDSim:
         self.cnt = dict.fromkeys(STATES, 0)
         self.ft_until = self.ex_until = -1.0
         self.sample_dt = sample_dt
+        # ADDED 2026-10-18 (fix #7): ADMITTED patients holding a bed while they wait for a ward. cnt["board"] also
+        # counts discharged patients still in a bed after the consult, so it is not a boarding count.
+        self.board_admitted = 0
         self.reset_stats()
 
     # ---- bookkeeping -------------------------------------------------------
@@ -207,6 +210,7 @@ class EDSim:
             p = self.pat[ref]
             self._set(p, "board")
             if p.admit:
+                self.board_admitted += 1
                 stay = p.hold * (EXPEDITE_FACTOR if now < self.ex_until else 1.0)
             else:   # ADDED 2026-10-18: per-patient stay only when the flag is on; otherwise the old constant
                 stay = p.hold if self.per_patient_stay else TURNAROUND
@@ -222,6 +226,8 @@ class EDSim:
                 return
             b["b"] -= 1
             p.t_dep = now
+            if p.admit:
+                self.board_admitted -= 1
             self._set(p, "done")
         elif kind == LWBS:
             p = self.pat.get(ref)
@@ -240,7 +246,7 @@ class EDSim:
         while self.next_sample <= t:
             self.samples.append({"t": self.next_sample, "beds": self.busy["b"], "docs": self.busy["d"],
                                  "tri_q": self.cnt["tri_q"], "prov_q": self.cnt["bed_q"] + self.cnt["doc_q"],
-                                 "board": self.cnt["board"]})
+                                 "board": self.cnt["board"], "board_admitted": self.board_admitted})
             self.next_sample += self.sample_dt
         dt = t - self.now
         for k in "ndb":

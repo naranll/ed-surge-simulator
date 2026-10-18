@@ -33,7 +33,7 @@ FEATURES = (
 
 def forecast_next4h(info: dict, now_min: float, volume_scale: float = 1.0) -> tuple:
     """(expected arrivals in the next 4 h, ratio to the normal-day expectation). Built from ``info`` only."""
-    from src.simulation.forecaster import forecast
+    from src.simulation.registry import forecast      # the one scenario registry (same as the old forecaster for its scenarios)
     from src.simulation.scenarios import BASE_VOLUME, HOURLY
     h0, frac = int(now_min // 60) % 24, (now_min % 60) / 60.0
     f = forecast(info, h0, 6)

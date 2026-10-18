@@ -1,16 +1,16 @@
 {
   "early_warning": {
     "alarm_thresholds": {
-      "beds_full": 0.3147711962461476,
-      "lwbs": 0.13822534263747546,
-      "urgent_late": 0.2524582888117474
+      "beds_full": 0.28955001533031455,
+      "lwbs": 0.14023067057132713,
+      "urgent_late": 0.2590454891324045
     },
     "caveat": "This model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, not validated on a real hospital.",
     "chosen": {
       "beds_full": {
         "best_any_family": {
-          "cv_mean": 0.2697768070167323,
-          "cv_se": 0.001139968223295575,
+          "cv_mean": 0.2632638775951459,
+          "cv_se": 0.00024342682249276713,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -22,8 +22,67 @@
         },
         "configs_tried": 12,
         "picked": {
-          "cv_mean": 0.27036791019275985,
-          "cv_se": 0.001084156165844785,
+          "cv_mean": 0.26346636052819367,
+          "cv_se": 0.0007206512919212954,
+          "family": "xgb",
+          "params": {
+            "learning_rate": 0.06,
+            "max_depth": 2,
+            "min_child_weight": 10.0,
+            "n_estimators": 200,
+            "reg_lambda": 5.0,
+            "subsample": 0.7
+          }
+        },
+        "search_seconds": 22.1
+      },
+      "lwbs": {
+        "best_any_family": {
+          "cv_mean": 0.14962895165000148,
+          "cv_se": 0.0005561582705342086,
+          "family": "xgb",
+          "params": {
+            "learning_rate": 0.1,
+            "max_depth": 4,
+            "min_child_weight": 1.0,
+            "n_estimators": 200,
+            "reg_lambda": 1.0,
+            "subsample": 1.0
+          }
+        },
+        "configs_tried": 12,
+        "picked": {
+          "cv_mean": 0.14962895165000148,
+          "cv_se": 0.0005561582705342086,
+          "family": "xgb",
+          "params": {
+            "learning_rate": 0.1,
+            "max_depth": 4,
+            "min_child_weight": 1.0,
+            "n_estimators": 200,
+            "reg_lambda": 1.0,
+            "subsample": 1.0
+          }
+        },
+        "search_seconds": 19.3
+      },
+      "urgent_late": {
+        "best_any_family": {
+          "cv_mean": 0.3661736185092898,
+          "cv_se": 0.0034309413278274356,
+          "family": "hgb",
+          "params": {
+            "l2_regularization": 0.0,
+            "learning_rate": 0.06,
+            "max_depth": 4,
+            "max_iter": 120,
+            "min_samples_leaf": 100
+          }
+        },
+        "configs_tried": 12,
+        "picked": {
+          "cv_mean": 0.36652089213525424,
+          "cv_se": 0.0036403231196793354,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -35,102 +94,54 @@
           }
         },
         "search_seconds": 18.8
-      },
-      "lwbs": {
-        "best_any_family": {
-          "cv_mean": 0.1484265454247433,
-          "cv_se": 0.0029252093258605367,
-          "family": "hgb",
-          "params": {
-            "l2_regularization": 0.0,
-            "learning_rate": 0.06,
-            "max_depth": 4,
-            "max_iter": 120,
-            "min_samples_leaf": 100
-          }
-        },
-        "configs_tried": 12,
-        "picked": {
-          "cv_mean": 0.15037326077225638,
-          "cv_se": 0.0026856490117789884,
-          "family": "logistic",
-          "params": {
-            "C": 1.0
-          }
-        },
-        "search_seconds": 20.3
-      },
-      "urgent_late": {
-        "best_any_family": {
-          "cv_mean": 0.3595743320496729,
-          "cv_se": 0.002642803021103454,
-          "family": "hgb",
-          "params": {
-            "l2_regularization": 0.0,
-            "learning_rate": 0.1,
-            "max_depth": 2,
-            "max_iter": 120,
-            "min_samples_leaf": 20
-          }
-        },
-        "configs_tried": 12,
-        "picked": {
-          "cv_mean": 0.3603344447151125,
-          "cv_se": 0.0011524408566719981,
-          "family": "logistic",
-          "params": {
-            "C": 0.1
-          }
-        },
-        "search_seconds": 18.5
       }
     },
     "data": {
       "days_per_scenario": 750,
-      "snapshots": 120000,
+      "snapshots": 150000,
       "test_days": 150,
       "train_days": 450,
       "val_days": 150
     },
     "headline_stage3_all_scenarios": {
       "beds_full": {
-        "auc_roc": 0.93540507010296,
-        "auc_roc_hi": 0.9423051493620354,
-        "auc_roc_lo": 0.9285564852444819,
-        "brier": 0.08674327267537565,
-        "ece": 0.006792044628008925,
-        "false_alarm_snapshots_per_normal_day": 1.6066666666666667,
-        "median_lead_min": 210.0,
-        "pr_auc": 0.8513948338589257,
-        "recall_at_5pct_fpr": 0.8107353906762967,
-        "rule_recall_at_5pct_fpr": 0.6114576493762311
+        "auc_roc": 0.9402185121415936,
+        "auc_roc_hi": 0.9464178383402064,
+        "auc_roc_lo": 0.9350608702516949,
+        "brier": 0.08510909456506141,
+        "ece": 0.008754558342926126,
+        "false_alarm_snapshots_per_normal_day": 1.2,
+        "median_lead_min": 255.0,
+        "pr_auc": 0.8639413314827907,
+        "recall_at_5pct_fpr": 0.8694768918232605,
+        "rule_recall_at_5pct_fpr": 0.6121127475876079
       },
       "lwbs": {
-        "auc_roc": 0.9683267834828798,
-        "auc_roc_hi": 0.9728417479436396,
-        "auc_roc_lo": 0.9635732694129813,
-        "brier": 0.0450028963095628,
-        "ece": 0.008655958256455619,
-        "false_alarm_snapshots_per_normal_day": 1.7733333333333334,
-        "median_lead_min": 235.97173197236327,
-        "pr_auc": 0.8869307843495334,
-        "recall_at_5pct_fpr": 0.8906334596643205,
-        "rule_recall_at_5pct_fpr": 0.784244721169464
+        "auc_roc": 0.9734188700707391,
+        "auc_roc_hi": 0.9767660504249617,
+        "auc_roc_lo": 0.9690172931847834,
+        "brier": 0.04245897545589727,
+        "ece": 0.0041332331180698005,
+        "false_alarm_snapshots_per_normal_day": 2.013333333333333,
+        "median_lead_min": 296.8428572379579,
+        "pr_auc": 0.9087126201274444,
+        "recall_at_5pct_fpr": 0.9214926590538336,
+        "rule_recall_at_5pct_fpr": 0.7926182707993474
       },
       "urgent_late": {
-        "auc_roc": 0.8556036455986236,
-        "auc_roc_hi": 0.8693890049710529,
-        "auc_roc_lo": 0.8399902220953172,
-        "brier": 0.11727167646217272,
-        "ece": 0.01674207783322237,
-        "false_alarm_snapshots_per_normal_day": 1.8,
-        "median_lead_min": 183.64296637432108,
-        "pr_auc": 0.6425307846927352,
-        "recall_at_5pct_fpr": 0.7633868161608351,
-        "rule_recall_at_5pct_fpr": 0.43340421418905856
+        "auc_roc": 0.8736042679850275,
+        "auc_roc_hi": 0.886070904570205,
+        "auc_roc_lo": 0.859080778275416,
+        "brier": 0.1134975346093058,
+        "ece": 0.011225807563378478,
+        "false_alarm_snapshots_per_normal_day": 1.62,
+        "median_lead_min": 214.03856068931862,
+        "pr_auc": 0.7058436831731899,
+        "recall_at_5pct_fpr": 0.8142960288808664,
+        "rule_recall_at_5pct_fpr": 0.4607942238267148
       }
     },
-    "runtime_seconds": 109.1
+    "runtime_seconds": 117.0
   },
   "patient_flow": {
     "admission": {
@@ -447,7 +458,7 @@
           "observed_rate": 0.1277
         }
       ],
-      "search_seconds": 18.3,
+      "search_seconds": 20.7,
       "test": {
         "baseline_triage_only": {
           "auc_roc": 0.7318082394912169,
@@ -801,7 +812,7 @@
           "min_samples_leaf": 50
         }
       },
-      "search_seconds": 16.5,
+      "search_seconds": 11.3,
       "target_note": "log(LOV - WAITTIME) in minutes: a proxy for time in the ED after first provider contact (includes tests, boarding).",
       "test": {
         "baseline_triage_median_only": {
@@ -877,7 +888,7 @@
       "triage_level": "IMMEDR_clean (valid 1-5 only)",
       "weekday": "VDAYR (official labels: 1 Sunday ... 7 Saturday)"
     },
-    "runtime_seconds": 45.2,
+    "runtime_seconds": 43.9,
     "saved_files": {
       "admission": "admission_xgboost.json",
       "admission_note": "CV winner is HistGradientBoosting (cannot be saved portably); the saved file is the best portable candidate instead: xgb {'n_estimators': 120, 'learning_rate': 0.06, 'max_depth': 2, 'min_child_weight': 1.0, 'subsample': 0.9, 'reg_lambda': 5.0}",
