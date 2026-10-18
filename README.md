@@ -1,4 +1,4 @@
-# PulseOps - ED Surge Simulator
+# KnightAI - ED Surge Simulator
 
 **Team KnightAI** · IBM Z Datathon 2026
 
