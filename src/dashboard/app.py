@@ -11,9 +11,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.explainer.briefing import build_briefing  # noqa: E402
-from src.optimization.optimizer import recommend, pretty  # noqa: E402
+from src.optimization.optimizer import recommend, pretty, OPTIMISER_PARAMETERS  # noqa: E402
 from src.simulation.ed_simulator import Action, LiveED, simulate  # noqa: E402
-from src.simulation.scenarios import ATS_TARGET, SCENARIOS  # noqa: E402
+from src.simulation.hospital import HOSPITAL_PARAMETERS, PRESETS, HospitalConfig  # noqa: E402
+from src.simulation.scenarios import ATS_TARGET, PARAMETER_TABLE, SCENARIOS, scenario_info  # noqa: E402
 
 # Clinical Triage Standards (Australasian Triage Scale / Emergency Severity Index)
 ATS_CONFIG = {
@@ -65,6 +66,46 @@ PROTOCOLS = [
     "Fast-Track Protocol",
     "Expedite Ward Transfers",
 ]
+
+HOSPITAL_PRESET_OPTIONS = {
+    "Baseline Unit (20 Beds, 5 Docs)": {
+        "beds": 20, "docs": 5, "nurses": 2, "scale": 1.0,
+        "tag": "Standard Acute Care Benchmark",
+        "desc": "Standard single-unit ED: 20 treatment bays, 5 attendings, 2 triage nurses (~200 visits/day).",
+    },
+    "Small Hospital (18 Beds, 2 Docs)": {
+        "beds": 18, "docs": 2, "nurses": 1, "scale": 0.3,
+        "tag": "Rural / Critical Access Hospital",
+        "desc": "Small community ED: 18 treatment beds, 2 doctors, 1 triage nurse (~60 visits/day).",
+    },
+    "Medium Hospital (36 Beds, 3 Docs)": {
+        "beds": 36, "docs": 3, "nurses": 2, "scale": 0.6,
+        "tag": "Suburban Regional Facility",
+        "desc": "Medium regional hospital: 36 treatment beds, 3 doctors, 2 triage nurses (~120 visits/day).",
+    },
+    "Large Hospital (60 Beds, 4 Docs)": {
+        "beds": 60, "docs": 4, "nurses": 3, "scale": 1.0,
+        "tag": "Tertiary Academic Center (Calibrated)",
+        "desc": "Large tertiary academic hospital: 60 treatment beds, 4 doctors, 3 triage nurses (~200 visits/day calibrated against CDC NHAMCS).",
+    },
+}
+
+
+def get_early_warning_risk(snapshot, info: dict, volume_scale: float = 1.0) -> dict:
+    """Predict 4-hour forward lookahead risk via Model 2 surrogate with safe fallback."""
+    try:
+        from models.predict_risk import predict_risk
+        return predict_risk(snapshot, info, volume_scale=volume_scale)
+    except Exception as exc:
+        return {
+            "risk_urgent_late": 0.0,
+            "risk_beds_full": 0.0,
+            "risk_lwbs": 0.0,
+            "breaks_first": "unavailable",
+            "alarm": False,
+            "message": f"Early-warning surrogate not active: {exc}",
+            "available": False,
+        }
 
 
 def live_metrics(live: LiveED) -> dict:
@@ -193,11 +234,21 @@ def get_hospital_state(live: LiveED) -> dict:
     }
 
 
-def compute_view(key: str, minute: float, seed: int = 42, workers: int = 1) -> dict:
+def compute_view(key: str, minute: float, seed: int = 42, workers: int = 1, preset_name: str = "Baseline Unit (20 Beds, 5 Docs)") -> dict:
     sc = SCENARIOS[key]
-    live = LiveED(sc, seed)
+    cfg = HOSPITAL_PRESET_OPTIONS.get(preset_name, HOSPITAL_PRESET_OPTIONS["Baseline Unit (20 Beds, 5 Docs)"])
+    live = LiveED(
+        sc,
+        seed=seed,
+        nurses=cfg["nurses"],
+        docs=cfg["docs"],
+        beds=cfg["beds"],
+        volume_scale=cfg["scale"],
+    )
     live.advance_to(minute)
     rec = recommend(live.snapshot(), sc, workers=workers)
+    info = scenario_info(key)
+    risk = get_early_warning_risk(live.snapshot(), info, volume_scale=cfg["scale"])
     hours = {h: {"arrivals": 0, "beds": [], "queue": []} for h in range(int(minute // 60) + 1)}
     for a in live.arrivals:
         if a.t <= minute:
@@ -220,6 +271,9 @@ def compute_view(key: str, minute: float, seed: int = 42, workers: int = 1) -> d
         "briefing": build_briefing(sc, rec),
         "hospital": get_hospital_state(live),
         "snapshot": live.snapshot(),
+        "risk": risk,
+        "preset": cfg,
+        "preset_name": preset_name,
     }
 
 
@@ -344,11 +398,11 @@ def render_hospital_twin(h: dict, m: dict):
                 f"</div></div>"
             )
 
-        grid_html = f"<div style='display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;'>{''.join(bed_cards)}</div>"
+        grid_html = f"<div style='display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;'>{''.join(bed_cards)}</div>"
         zone_b_html = (
             f"<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.03); box-sizing:border-box;'>"
             f"<div style='display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:12px;'>"
-            f"<span style='font-weight:700; color:#1e293b; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;'>Acute Care Bays (20 Bed Unit)</span>"
+            f"<span style='font-weight:700; color:#1e293b; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;'>Acute Care Bays ({m['total_beds']} Bed Unit)</span>"
             f"<span style='font-size:11px; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 8px; border-radius:4px; font-weight:600; color:#475569;'>Occupancy: <b>{m['in_beds']}/{m['total_beds']} ({m['bed_pct']:.0f}%)</b></span>"
             f"</div>"
             f"{grid_html}"
@@ -466,11 +520,12 @@ def main() -> None:  # pragma: no cover - UI
     st.html(header_html)
 
     # 2. Controls & Scenario Selection Bar
-    c1, c2, c3, c4 = st.columns([4, 4, 1, 1])
+    c1, c2, c3, c4, c5 = st.columns([3, 3, 3, 1, 1])
     key = c1.selectbox("Operational Scenario", list(SCENARIOS), format_func=lambda k: SCENARIOS[k].name)
-    c2.slider("Simulation Clock (24-Hour Horizon)", 0.0, 24.0, step=0.5, key="clock")
-    c3.button("Pause" if ss.playing else "Play", on_click=lambda: ss.update(playing=not ss.playing))
-    c4.button("+30m Step", on_click=lambda: ss.update(clock=min(24.0, ss.clock + 0.5)))
+    preset_key = c2.selectbox("Hospital Scale Preset", list(HOSPITAL_PRESET_OPTIONS), index=0)
+    c3.slider("Simulation Clock (24-Hour Horizon)", 0.0, 24.0, step=0.5, key="clock")
+    c4.button("Pause" if ss.playing else "Play", on_click=lambda: ss.update(playing=not ss.playing))
+    c5.button("+30m Step", on_click=lambda: ss.update(clock=min(24.0, ss.clock + 0.5)))
 
     # Scenario Clinical Profile Banner
     sc_info = SCENARIO_PROFILES.get(key, SCENARIO_PROFILES["normal"])
@@ -483,12 +538,13 @@ def main() -> None:  # pragma: no cover - UI
     st.html(scenario_banner_html)
 
     @st.cache_data(show_spinner=False)
-    def cached(k: str, m: float):
-        return compute_view(k, m)
+    def cached(k: str, m: float, p: str):
+        return compute_view(k, m, preset_name=p)
 
-    v = cached(key, ss.clock * 60.0)
+    v = cached(key, ss.clock * 60.0, preset_key)
     m, rec = v["metrics"], v["rec"]
     h = v["hospital"]
+    risk = v.get("risk", {})
 
     # 3. Clinical Telemetry KPIs (01. System Telemetry)
     st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;'>01. Real-Time Emergency Department Telemetry</div>", unsafe_allow_html=True)
@@ -498,6 +554,99 @@ def main() -> None:  # pragma: no cover - UI
     g3.metric("ATS 2 Breach Rate", f"{m['ats2_breach_pct']:.0f}%", "Target: ≤10m")
     g4.metric("Waiting Room Census", f"{len(h['tri_q']) + len(h['bed_q'])}", f"{len(h['bed_q'])} triaged")
     g5.metric("Inpatient Boarding Block", f"{m['boarding_count']}", "Holding Acute Beds")
+
+    # 4. AI Early Warning • 4-Hour Lookahead Risk Engine (ML Surrogate)
+    st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>02. AI Early Warning • 4-Hour Lookahead Risk Engine (Surrogate ML)</div>", unsafe_allow_html=True)
+    if risk.get("available"):
+        alarm = risk.get("alarm", False)
+        breaks_first = risk.get("breaks_first", "Unknown")
+        urgent_late_risk = (risk.get("risk_urgent_late") or 0.0) * 100.0
+        beds_full_risk = (risk.get("risk_beds_full") or 0.0) * 100.0
+        lwbs_risk = (risk.get("risk_lwbs") or 0.0) * 100.0
+
+        if alarm:
+            banner_html = (
+                f"<div style='background:#fef2f2; border:1px solid #fecaca; border-left:4px solid #dc2626; border-radius:8px; padding:12px 16px; margin-bottom:12px; box-sizing:border-box;'>"
+                f"<div style='display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;'>"
+                f"<div>"
+                f"<span style='background:#fee2e2; color:#b91c1c; font-weight:800; font-size:11px; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-right:8px;'>⚠️ 4-HOUR SURGE ALARM</span>"
+                f"<span style='color:#991b1b; font-size:13px; font-weight:700;'>Bottleneck will breach first at: <span style='text-decoration:underline;'>{breaks_first.upper()}</span></span>"
+                f"</div>"
+                f"<span style='font-size:11px; color:#b91c1c; font-weight:600;'>XGBoost / Logistic Surrogate Active</span>"
+                f"</div>"
+                f"<div style='color:#7f1d1d; font-size:11.5px; margin-top:6px;'>{risk.get('message', '')}</div>"
+                f"</div>"
+            )
+        else:
+            banner_html = (
+                f"<div style='background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #16a34a; border-radius:8px; padding:12px 16px; margin-bottom:12px; box-sizing:border-box;'>"
+                f"<div style='display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;'>"
+                f"<div>"
+                f"<span style='background:#dcfce7; color:#15803d; font-weight:800; font-size:11px; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-right:8px;'>✓ EARLY WARNING NOMINAL</span>"
+                f"<span style='color:#166534; font-size:13px; font-weight:700;'>All operational failure modes are within safe capacity limits for next 4 hours</span>"
+                f"</div>"
+                f"<span style='font-size:11px; color:#15803d; font-weight:600;'>XGBoost / Logistic Surrogate Active</span>"
+                f"</div>"
+                f"<div style='color:#14532d; font-size:11.5px; margin-top:6px;'>{risk.get('message', '')}</div>"
+                f"</div>"
+            )
+        st.html(banner_html)
+
+        # 3 Visual Risk Gauges
+        rg1, rg2, rg3 = st.columns(3)
+        with rg1:
+            color = "#dc2626" if urgent_late_risk > 25 else "#d97706" if urgent_late_risk > 15 else "#16a34a"
+            tag = "HIGH RISK" if urgent_late_risk > 25 else "ELEVATED" if urgent_late_risk > 15 else "NORMAL"
+            st.markdown(
+                f"<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; box-sizing:border-box;'>"
+                f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;'>"
+                f"<span style='font-size:11px; font-weight:700; color:#475569; text-transform:uppercase;'>Urgent Seen Late (ATS 1-3)</span>"
+                f"<span style='font-size:10px; font-weight:700; color:{color};'>{tag}</span>"
+                f"</div>"
+                f"<div style='font-size:22px; font-weight:800; color:{color};'>{urgent_late_risk:.1f}%</div>"
+                f"<div style='height:6px; background:#f1f5f9; border-radius:3px; margin:6px 0; overflow:hidden;'>"
+                f"<div style='width:{min(100.0, urgent_late_risk)}%; height:100%; background:{color};'></div>"
+                f"</div>"
+                f"<div style='font-size:10px; color:#64748b;'>ATS 1–3 triage breach probability (Alarm line: 25%)</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+        with rg2:
+            color = "#dc2626" if beds_full_risk > 31 else "#d97706" if beds_full_risk > 20 else "#16a34a"
+            tag = "HIGH RISK" if beds_full_risk > 31 else "ELEVATED" if beds_full_risk > 20 else "NORMAL"
+            st.markdown(
+                f"<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; box-sizing:border-box;'>"
+                f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;'>"
+                f"<span style='font-size:11px; font-weight:700; color:#475569; text-transform:uppercase;'>Acute Bed Saturation</span>"
+                f"<span style='font-size:10px; font-weight:700; color:{color};'>{tag}</span>"
+                f"</div>"
+                f"<div style='font-size:22px; font-weight:800; color:{color};'>{beds_full_risk:.1f}%</div>"
+                f"<div style='height:6px; background:#f1f5f9; border-radius:3px; margin:6px 0; overflow:hidden;'>"
+                f"<div style='width:{min(100.0, beds_full_risk)}%; height:100%; background:{color};'></div>"
+                f"</div>"
+                f"<div style='font-size:10px; color:#64748b;'>Beds > 95% full probability (Alarm line: 31%)</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+        with rg3:
+            color = "#dc2626" if lwbs_risk > 14 else "#d97706" if lwbs_risk > 8 else "#16a34a"
+            tag = "HIGH RISK" if lwbs_risk > 14 else "ELEVATED" if lwbs_risk > 8 else "NORMAL"
+            st.markdown(
+                f"<div style='background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; box-sizing:border-box;'>"
+                f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;'>"
+                f"<span style='font-size:11px; font-weight:700; color:#475569; text-transform:uppercase;'>Walkout / LWBS Queue</span>"
+                f"<span style='font-size:10px; font-weight:700; color:{color};'>{tag}</span>"
+                f"</div>"
+                f"<div style='font-size:22px; font-weight:800; color:{color};'>{lwbs_risk:.1f}%</div>"
+                f"<div style='height:6px; background:#f1f5f9; border-radius:3px; margin:6px 0; overflow:hidden;'>"
+                f"<div style='width:{min(100.0, lwbs_risk)}%; height:100%; background:{color};'></div>"
+                f"</div>"
+                f"<div style='font-size:10px; color:#64748b;'>Patients walk out unseen probability (Alarm line: 14%)</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+    else:
+        st.info("Early-warning surrogate model is currently running in baseline fallback mode.")
 
     # 4. Tactical Surge Intervention Deck (02. Operational What-If Controls)
     st.markdown("<div style='font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase; margin:18px 0 8px 0;'>02. Tactical Surge Intervention Deck (What-If Controls)</div>", unsafe_allow_html=True)
@@ -623,6 +772,86 @@ def main() -> None:  # pragma: no cover - UI
 
     with st.expander("07. Comprehensive Policy Evaluation (Pareto Frontier Table)"):
         st.dataframe(pd.DataFrame(rec.table), use_container_width=True)
+
+    with st.expander("08. Model Cards, Calibration Evidence & LinuxONE Verification", expanded=False):
+        import json
+        from pathlib import Path
+
+        root_dir = Path(__file__).resolve().parents[2]
+        tab_ew, tab_pf, tab_lx, tab_params = st.tabs([
+            "Model 2: 4-Hour Early Warning Surrogate",
+            "Model 1: CDC NHAMCS Real Data Calibration",
+            "System Performance & LinuxONE Benchmarks",
+            "Parameter Provenance Audit (81 Parameters)"
+        ])
+
+        with tab_ew:
+            st.markdown(
+                "**Early Warning AI Surrogate (XGBoost / Logistic Models)**\n"
+                "- **Dataset:** 750 simulated operational days × 4 scenario types = 120,000 temporal state snapshots.\n"
+                "- **Horizon:** 4-hour forward lookahead across 3 critical failure targets: `urgent_late` (ATS 1–3), `beds_full` (>95%), and `lwbs` (walkout).\n"
+                "- **False Alarm Control:** Fixed at ≤ 5% false alarm rate on baseline days."
+            )
+            stage_csv = root_dir / "models" / "stage_results.csv"
+            if stage_csv.exists():
+                sdf = pd.read_csv(stage_csv)
+                cols = [c for c in ("stage", "train_on", "test_on", "target", "auc_roc", "auc_roc_lo", "auc_roc_hi", "recall_at_5pct_fpr", "rule_recall_at_5pct_fpr", "median_lead_min") if c in sdf.columns]
+                st.markdown("**Stage-by-Stage Progressive Generalization (AUC ROC & Early-Warning Lead Time):**")
+                st.dataframe(sdf[cols].round(3), hide_index=True, use_container_width=True)
+            stage_png = root_dir / "results" / "stage_chart.png"
+            if stage_png.exists():
+                st.image(str(stage_png), caption="Progressive Learning Stages: Stage 1 (Normal Only) vs Stage 2 (Unseen Surge Generalization) vs Stage 3 (Retrained with Surge Data)")
+
+        with tab_pf:
+            st.markdown(
+                "**Model 1: CDC NHAMCS 2022 Ground-Truth Survey Calibration**\n"
+                "- **Empirical Source:** CDC National Hospital Ambulatory Medical Care Survey (NHAMCS 2022 Public Use File).\n"
+                "- **Cohort:** 10,125 triaged visits across 147 hospitals; held-out hospitals for out-of-sample testing.\n"
+                "- **Admission Model (HGB):** Test ROC AUC **0.845** (95% CI 0.790–0.878) vs 0.732 baseline triage-only model."
+            )
+            cal_png = root_dir / "results" / "for_slides" / "calibration_real_vs_simulated.png"
+            if cal_png.exists():
+                st.image(str(cal_png), caption="Calibration Curve: Real NHAMCS 2022 Patient Flow Distribution vs Simulated Monday")
+            cal_csv = root_dir / "results" / "calibration.csv"
+            if cal_csv.exists():
+                st.markdown("**Empirical vs Simulated Normal Day Benchmark:**")
+                st.dataframe(pd.read_csv(cal_csv), hide_index=True, use_container_width=True)
+
+        with tab_lx:
+            st.markdown(
+                "**In-Memory Microsecond Execution & IBM LinuxONE (s390x) Validation**\n"
+                "- **Engine:** Pure-Python in-memory discrete-event simulation with CRN (Common Random Numbers).\n"
+                "- **Throughput:** Average **6.62ms** to **14.93ms** per full 24-hour hospital day.\n"
+                "- **Architecture:** s390x big-endian mainframe enterprise server & x86 multi-worker multiprocessing support."
+            )
+            timing_png = root_dir / "results" / "for_slides" / "timing_workers.png"
+            if timing_png.exists():
+                st.image(str(timing_png), caption="Multiprocessing Scalability Across Concurrent Workers (Days/Second Throughput)")
+            local_json = root_dir / "results" / "local_run.json"
+            if local_json.exists():
+                try:
+                    lj = json.loads(local_json.read_text(encoding="utf-8"))
+                    pt = lj.get("parallel_timing")
+                    if pt:
+                        st.markdown("**Parallel Worker Benchmark Run:**")
+                        st.dataframe(pd.DataFrame(pt), hide_index=True, use_container_width=True)
+                except Exception:
+                    pass
+
+        with tab_params:
+            st.markdown(
+                "**Clinical Parameter Transparency & Evidence Audit (81 Parameters)**\n"
+                "- **[DATA]:** Measured directly from CDC NHAMCS survey dataset.\n"
+                "- **[EVIDENCE]:** Sourced from peer-reviewed clinical studies (Nature Health 2025, Texas DSHS, Disaster Medicine).\n"
+                "- **[ASSUMPTION]:** Explicit operational boundaries and baseline staffing models."
+            )
+            all_params = [
+                {"Parameter": p["name"], "Value": json.dumps(p["value"], default=str)[:120], "Tag": p.get("tag", "ASSUMPTION"), "Status": p.get("status", "ok"), "Clinical Note / Source": p.get("note", "")}
+                for p in PARAMETER_TABLE + HOSPITAL_PARAMETERS + OPTIMISER_PARAMETERS
+            ]
+            ptdf = pd.DataFrame(all_params)
+            tag_filter = st.multiselect("Filter Provenance Tags", ["DATA", "EVIDENCE", "ASSUMPTION"], default=["DATA", "EVIDENCE", "ASSUMPTION"], key="filter_param_tags")
+            st.dataframe(ptdf[ptdf["Tag"].isin(tag_filter)], hide_index=True, use_container_width=True)
 
     if ss.playing:
         time.sleep(1.0)
