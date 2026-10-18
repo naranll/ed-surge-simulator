@@ -177,17 +177,23 @@ class Recommendation:
 
 def recommend(snapshot: EDSim, scenario: Scenario = SCENARIOS["normal"], seeds: Sequence[int] = SEEDS,
               hours: float = 4, candidates: Optional[Sequence[Action]] = None,
-              workers: int = 1) -> Recommendation:
+              workers: int = 1, forecasts: Optional[dict] = None) -> Recommendation:
     """Evaluate every candidate on identical forecast streams (CRN) and pick the min-loss action.
 
     The snapshot should come from ``LiveED.snapshot()`` (no future arrivals); the
     forward stream is *forecast* from the scenario rates, never read from the live truth.
+    ADDED 2026-10-18: ``forecasts`` = {seed: [Arrival]} lets a caller pass forecast patients it built itself
+    (e.g. with real-data stay times); then ``seeds`` is ignored. Default None = the old behaviour.
     """
     cands = list(candidates or candidate_actions())
     if not any(a.name == "DO_NOTHING" for a in cands):
         cands.insert(0, Action())
     t0, t1 = snapshot.now, snapshot.now + hours * 60.0
-    arr = {s: generate_arrivals(scenario, s, t0, t1, base_pid=FORECAST_PID) for s in seeds}
+    if forecasts is not None:
+        seeds = list(forecasts)
+        arr = dict(forecasts)
+    else:
+        arr = {s: generate_arrivals(scenario, s, t0, t1, base_pid=FORECAST_PID) for s in seeds}
     jobs = [(snapshot, arr[s], a, hours) for a in cands for s in seeds]
     if workers > 1:
         with ProcessPoolExecutor(workers) as ex:

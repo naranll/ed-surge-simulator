@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from src.optimization.optimizer import DAY_MIN, Plan, boarding_cut_shim, compute_metrics
-from src.simulation import patient_flow
+from src.simulation import capacity, patient_flow
 from src.simulation.ed_simulator import ATS_TARGET, Action, EDSim
 from src.simulation.scenarios import CAPACITY
 
@@ -65,13 +65,20 @@ class HospitalConfig:
         }
 
 
-# Reference hospitals. Capacities are ASSUMPTIONS (NHAMCS has no bed counts). "Large" was set by calibration
-# (results/calibration.csv); Small and Medium are the same design scaled by patient volume (30% / 60%) and are NOT separately calibrated.
-PRESETS = {
-    "Small": HospitalConfig(beds=18, triage_nurses=1, doctors=2, patient_flow=True, volume_scale=0.3),     # ~60 patients/day
-    "Medium": HospitalConfig(beds=36, triage_nurses=2, doctors=3, patient_flow=True, volume_scale=0.6),    # ~120 patients/day
-    "Large": HospitalConfig(beds=60, triage_nurses=3, doctors=4, patient_flow=True, volume_scale=1.0),     # ~200/day: the calibrated one
-}
+# Reference hospitals come from configs/capacity.json (ONE source of truth, written by scripts/calibrate.py).
+# "Large" is the calibrated reference; Small and Medium are the same design scaled by an UNSOURCED volume share.
+def _build_presets() -> dict:
+    try:
+        specs = capacity.preset_specs()
+    except FileNotFoundError as err:          # only while bootstrapping: calibrate.py creates the file
+        import sys
+        print(f"warning: {err}", file=sys.stderr)
+        return {}
+    return {name: HospitalConfig(beds=v["beds"], triage_nurses=v["triage_nurses"], doctors=v["doctors"],
+                                 patient_flow=True, volume_scale=v["volume_scale"]) for name, v in specs.items()}
+
+
+PRESETS = _build_presets()
 
 
 def prepare(cfg: HospitalConfig, patients: Sequence) -> list:
@@ -231,8 +238,8 @@ def generate_day(name: str, seed: int, intensity: Optional[float] = None, burst:
 HOSPITAL_PARAMETERS = [
     {"name": "Hospital presets (beds / nurses / doctors / volume)", "tag": "ASSUMPTION", "status": "unverified",
      "value": {k: [c.beds, c.triage_nurses, c.doctors, c.volume_scale] for k, c in PRESETS.items()},
-     "note": "NHAMCS has no bed or staff counts. 'Large' (60 beds, 3 nurses, 4 doctors, ~200 patients/day) was picked by scripts/calibrate.py to match NHAMCS waits, "
-             "left-unseen share and care times; Small and Medium are the same design scaled by volume and are NOT separately calibrated."},
+     "note": ("NHAMCS has no bed or staff counts. Read from configs/capacity.json: the reference hospital was fitted by scripts/calibrate.py "
+              "to NHAMCS urgent waits and left-unseen share; Small and Medium are that design scaled by an UNSOURCED volume share and are NOT calibrated.")},
     {"name": "Admission chance by triage level x age band", "tag": "DATA", "status": "verified",
      "value": "models/patient_flow/admission_lookup.json",
      "note": "NHAMCS 2022, PATWT-weighted, ADMITHOS == 1; small cells blended toward the triage rate (shrinkage k=10, an ASSUMPTION)."},

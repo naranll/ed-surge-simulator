@@ -1,12 +1,13 @@
-"""ED Surge Simulator CLI.  python run.py demo|rolling|dashboard"""
+"""ED Surge Simulator CLI.  python run.py demo|rolling|dashboard
+
+demo / rolling use the calibrated hospital from configs/capacity.json and real-data patient times
+(src/demo/live_demo.py). With ED_USE_LEGACY_PARAMS=1 they use the original route (src/dashboard/app.py), unchanged.
+"""
 import argparse
 import subprocess
 import sys
 
-from src.dashboard.app import compute_view
-from src.optimization.optimizer import rolling
-from src.simulation.ed_simulator import LiveED
-from src.simulation.scenarios import SCENARIOS
+from src.simulation.scenarios import SCENARIOS, USE_LEGACY_PARAMS
 
 
 def main() -> None:
@@ -19,12 +20,27 @@ def main() -> None:
     a = ap.parse_args()
     if a.cmd == "dashboard":
         sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py"]))
+    if USE_LEGACY_PARAMS:                       # the original behaviour, exactly as before
+        from src.dashboard.app import compute_view
+        from src.optimization.optimizer import rolling
+        from src.simulation.ed_simulator import LiveED
+        if a.cmd == "demo":
+            v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers)
+            print(v["rec"].headline(), "\n\n" + v["briefing"])
+        else:
+            live, sc = LiveED(SCENARIOS[a.scenario], a.seed), SCENARIOS[a.scenario]
+            for r in rolling(live, sc, 0, 24 * 60, 30, workers=a.workers):
+                print(f"{int(r.t // 60):02d}:{int(r.t % 60):02d}  {r.action:<45} breach -{r.breach_reduction_pct:3.0f}%  "
+                      f"wait -{r.wait_reduction:4.0f}m  cost ${r.cost:,.0f}")
+        return
+    from src.demo.live_demo import compute_view, rolling_view
     if a.cmd == "demo":
         v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers)
+        c = v["config"]
+        print(f"Hospital: {c.effective_beds} beds, {c.doctors} doctors, {c.triage_capacity} triage nurses (configs/capacity.json)\n")
         print(v["rec"].headline(), "\n\n" + v["briefing"])
     else:
-        live, sc = LiveED(SCENARIOS[a.scenario], a.seed), SCENARIOS[a.scenario]
-        for r in rolling(live, sc, 0, 24 * 60, 30, workers=a.workers):
+        for r in rolling_view(a.scenario, a.seed, 0, 24 * 60, 30, workers=a.workers):
             print(f"{int(r.t // 60):02d}:{int(r.t % 60):02d}  {r.action:<45} breach -{r.breach_reduction_pct:3.0f}%  "
                   f"wait -{r.wait_reduction:4.0f}m  cost ${r.cost:,.0f}")
 
