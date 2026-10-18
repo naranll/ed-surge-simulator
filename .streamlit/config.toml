@@ -1,0 +1,25 @@
+# Clinical light theme for PulseOps (dashboard v2). Streamlit reads this file when started from the repo root:
+#     streamlit run src/dashboard/app_v2.py
+# Streamlit Community Cloud also reads .streamlit/config.toml from the repo root.
+[theme]
+base = "light"
+primaryColor = "#0B5CAD"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+textColor = "#1F2937"
+linkColor = "#0B5CAD"
+font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+headingFont = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+baseRadius = "8px"
+borderColor = "#D1D5DB"
+dataframeBorderColor = "#E5E7EB"
+showWidgetBorder = true
+
+[theme.sidebar]
+backgroundColor = "#F8FAFC"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2937"
+
+[client]
+# Hide the "Deploy" button and developer menu for viewers.
+toolbarMode = "minimal"

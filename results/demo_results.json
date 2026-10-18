@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18 09:48:34",
+  "generated": "2026-10-18 05:45:58",
   "caveat": "Simulation built on national survey data (NHAMCS 2022) and stated assumptions. Not a real hospital, not medical advice. The early-warning model learns the simulator and is not validated on a real hospital.",
   "scenarios": [
     {
@@ -11,9 +11,9 @@
       "lwbs_pct": "1.89",
       "peak_bed_occupancy_pct": "87.1",
       "longest_queue": "13.5",
-      "ms_per_simulated_day": "10.09",
+      "ms_per_simulated_day": "7.08",
       "recommended_plan": "Do nothing",
-      "plan_search_seconds": "12.6",
+      "plan_search_seconds": "8.0",
       "plan_search_replications": "50"
     },
     {
@@ -25,9 +25,9 @@
       "lwbs_pct": "6.78",
       "peak_bed_occupancy_pct": "96.0",
       "longest_queue": "21.2",
-      "ms_per_simulated_day": "17.94",
+      "ms_per_simulated_day": "7.65",
       "recommended_plan": "12:00-18:00 +1 clinician, fast track",
-      "plan_search_seconds": "15.7",
+      "plan_search_seconds": "8.8",
       "plan_search_replications": "50"
     },
     {
@@ -39,9 +39,9 @@
       "lwbs_pct": "5.25",
       "peak_bed_occupancy_pct": "94.9",
       "longest_queue": "19.2",
-      "ms_per_simulated_day": "19.51",
+      "ms_per_simulated_day": "7.81",
       "recommended_plan": "12:00-18:00 +1 clinician",
-      "plan_search_seconds": "15.1",
+      "plan_search_seconds": "8.9",
       "plan_search_replications": "50"
     },
     {
@@ -53,9 +53,9 @@
       "lwbs_pct": "11.09",
       "peak_bed_occupancy_pct": "99.1",
       "longest_queue": "31.4",
-      "ms_per_simulated_day": "18.79",
+      "ms_per_simulated_day": "8.1",
       "recommended_plan": "12:00-18:00 +1 clinician",
-      "plan_search_seconds": "14.1",
+      "plan_search_seconds": "8.9",
       "plan_search_replications": "50"
     },
     {
@@ -67,9 +67,9 @@
       "lwbs_pct": "11.76",
       "peak_bed_occupancy_pct": "99.1",
       "longest_queue": "28",
-      "ms_per_simulated_day": "17.66",
+      "ms_per_simulated_day": "8.35",
       "recommended_plan": "12:00-18:00 +1 clinician, fast track",
-      "plan_search_seconds": "15.2",
+      "plan_search_seconds": "9.7",
       "plan_search_replications": "50"
     }
   ],
@@ -291,39 +291,39 @@
     "early_warning": {
       "headline_stage3_all_scenarios": {
         "beds_full": {
-          "auc_roc": 0.9402185121415936,
-          "auc_roc_hi": 0.9464178383402064,
-          "auc_roc_lo": 0.9350608702516949,
-          "brier": 0.08510909456506141,
-          "ece": 0.008754558342926126,
-          "false_alarm_snapshots_per_normal_day": 1.2,
+          "auc_roc": 0.9402444750438892,
+          "auc_roc_hi": 0.9464148494535424,
+          "auc_roc_lo": 0.9350007396374357,
+          "brier": 0.08506691267067833,
+          "ece": 0.008806122532799297,
+          "false_alarm_snapshots_per_normal_day": 1.2066666666666668,
           "median_lead_min": 255.0,
-          "pr_auc": 0.8639413314827907,
-          "recall_at_5pct_fpr": 0.8694768918232605,
+          "pr_auc": 0.8641040969851179,
+          "recall_at_5pct_fpr": 0.8676993397663789,
           "rule_recall_at_5pct_fpr": 0.6121127475876079
         },
         "lwbs": {
-          "auc_roc": 0.9734188700707391,
-          "auc_roc_hi": 0.9767660504249617,
-          "auc_roc_lo": 0.9690172931847834,
-          "brier": 0.04245897545589727,
-          "ece": 0.0041332331180698005,
-          "false_alarm_snapshots_per_normal_day": 2.013333333333333,
-          "median_lead_min": 296.8428572379579,
-          "pr_auc": 0.9087126201274444,
-          "recall_at_5pct_fpr": 0.9214926590538336,
+          "auc_roc": 0.9735901698651729,
+          "auc_roc_hi": 0.9769358721935008,
+          "auc_roc_lo": 0.969327618222943,
+          "brier": 0.042347812206003935,
+          "ece": 0.004441498424386918,
+          "false_alarm_snapshots_per_normal_day": 2.033333333333333,
+          "median_lead_min": 288.7030759374004,
+          "pr_auc": 0.9090876832840635,
+          "recall_at_5pct_fpr": 0.9208809135399674,
           "rule_recall_at_5pct_fpr": 0.7926182707993474
         },
         "urgent_late": {
-          "auc_roc": 0.8736042679850275,
-          "auc_roc_hi": 0.886070904570205,
-          "auc_roc_lo": 0.859080778275416,
-          "brier": 0.1134975346093058,
-          "ece": 0.011225807563378478,
+          "auc_roc": 0.8734168521263656,
+          "auc_roc_hi": 0.8859818765061613,
+          "auc_roc_lo": 0.8589107326645511,
+          "brier": 0.11355645120448289,
+          "ece": 0.010551922562555407,
           "false_alarm_snapshots_per_normal_day": 1.62,
-          "median_lead_min": 214.03856068931862,
-          "pr_auc": 0.7058436831731899,
-          "recall_at_5pct_fpr": 0.8142960288808664,
+          "median_lead_min": 214.72346697944096,
+          "pr_auc": 0.7055727342075129,
+          "recall_at_5pct_fpr": 0.8222382671480144,
           "rule_recall_at_5pct_fpr": 0.4607942238267148
         }
       },
@@ -332,44 +332,46 @@
   },
   "early_warning_example": {
     "day": "heatwave, Large hospital, 14:00",
-    "risk_urgent_late": 0.6314976811408997,
-    "risk_beds_full": 0.9353410601615906,
-    "risk_lwbs": 0.9807444214820862,
+    "risk_urgent_late": 0.6118532419204712,
+    "risk_beds_full": 0.9368836283683777,
+    "risk_lwbs": 0.978227972984314,
     "breaks_first": "patients leaving without being seen",
     "alarm": true,
     "message": "Watch patients leaving without being seen: chance 98% in the next 4 hours (alarm line 14%). Simulation-based early warning, not validated on a real hospital.",
     "available": true
   },
-  "linuxone": "No LinuxONE run recorded yet",
-  "local_run_not_linuxone": {
-    "uname_m": "AMD64",
-    "nproc": 8,
-    "python": "3.12.0",
-    "total_seconds": 410.5,
+  "linuxone": {
+    "uname_m": "s390x",
+    "nproc": 3,
+    "python": "3.12.15",
+    "total_seconds": 226.4,
+    "seconds_per_step": {
+      "tests": 26.7,
+      "scenarios_and_plan_search": 46.3,
+      "early_warning_data": 15.5,
+      "parallel_timing": 19.8,
+      "calibration": 7.2,
+      "patient_flow_model": 20.2,
+      "early_warning_model": 90.0
+    },
     "parallel_timing": [
       {
         "workers": 1,
-        "seconds": 13.97,
+        "seconds": 9.06,
         "days": 1000,
         "speedup_vs_1_worker": 1.0
       },
       {
         "workers": 2,
-        "seconds": 9.62,
+        "seconds": 4.67,
         "days": 1000,
-        "speedup_vs_1_worker": 1.45
+        "speedup_vs_1_worker": 1.94
       },
       {
         "workers": 4,
-        "seconds": 9.45,
+        "seconds": 3.24,
         "days": 1000,
-        "speedup_vs_1_worker": 1.48
-      },
-      {
-        "workers": 8,
-        "seconds": 9.11,
-        "days": 1000,
-        "speedup_vs_1_worker": 1.53
+        "speedup_vs_1_worker": 2.8
       }
     ]
   },
