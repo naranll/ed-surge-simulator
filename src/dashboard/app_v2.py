@@ -64,15 +64,13 @@ st.set_page_config(page_title=f"{PRODUCT} - {SUBTITLE}", page_icon=None, layout=
 
 # Light clinical look. Colours and fonts come from .streamlit/config.toml (repo root); this block only styles the page's
 # own cards and fixes contrast where Streamlit fades text (captions, widget labels) below WCAG AA.
-st.markdown("""
-<style>
+_CSS = """<style>
   .block-container { max-width: 1240px; padding-top: 1.6rem; padding-bottom: 3rem; }
   h1, h2, h3, h4 { color: #111827; }
   [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] * { color: #4B5563 !important; opacity: 1 !important; }
   [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label { color: #1F2937; font-weight: 600; }
   [data-testid="stExpander"] summary p { color: #111827; font-weight: 600; }
   [data-testid="stSidebar"] h2 { font-size: 1.05rem; color: #111827; margin-top: .6rem; }
-  /* inputs: white, light grey border, dark text */
   [data-baseweb="input"], [data-baseweb="base-input"], [data-baseweb="select"] > div, [data-baseweb="textarea"] {
       background: #FFFFFF !important; border-color: #D1D5DB !important; color: #1F2937; }
   [data-baseweb="input"] input, [data-baseweb="select"] div { color: #1F2937; }
@@ -81,11 +79,8 @@ st.markdown("""
   [data-testid="stMetric"] { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; }
   [data-testid="stMetricLabel"] p { color: #1F2937; font-weight: 600; }
   [data-testid="stMetricValue"] { color: #111827; }
-  /* live metric deltas: every live metric here is 'higher = worse' (delta_color="inverse"), so up = red, down = green */
   [data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Up"]), [data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Up"]) * { color: #B91C1C !important; }
   [data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Down"]), [data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Down"]) * { color: #15803D !important; }
-
-  /* header */
   .po-hdr { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
             padding-bottom: 12px; border-bottom: 1px solid #E5E7EB; }
   .po-brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
@@ -98,12 +93,8 @@ st.markdown("""
   .po-lx { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
   .po-dot { width: 8px; height: 8px; border-radius: 50%; background: #15803D; display: inline-block; }
   .po-caveat { color: #4B5563; font-size: 14px; margin: 8px 0 4px 0; }
-
-  /* section titles: 24px spacing between sections */
   .po-h2 { font-size: 20px; font-weight: 700; color: #111827; margin: 24px 0 4px 0; }
   .po-h2-sub { color: #4B5563; font-size: 14px; margin: 0 0 12px 0; }
-
-  /* KPI cards */
   .po-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
   .po-kpi { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; }
   .po-kpi-label { font-size: 14px; font-weight: 600; color: #1F2937; }
@@ -113,8 +104,6 @@ st.markdown("""
   .po-same { background: #F3F4F6; color: #4B5563; }
   .po-worse { background: #FEF2F2; color: #B91C1C; }
   .po-better { background: #F0FDF4; color: #15803D; }
-
-  /* recommended plan card */
   .po-rec { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 6px solid #15803D; border-radius: 8px; padding: 16px 20px; }
   .po-rec.po-none { border-left-color: #0B5CAD; }
   .po-rec-tag { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #15803D; }
@@ -124,14 +113,11 @@ st.markdown("""
   .po-rec-val { font-size: 22px; font-weight: 700; color: #111827; margin: 2px 0; }
   .po-rec-effect { margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E7EB; color: #1F2937; font-size: 15px; }
   .po-rec-note { margin-top: 8px; color: #4B5563; font-size: 13px; }
-
-  /* early-warning risk tiles */
   .po-risk { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 4px 0 8px 0; }
   .po-risk > div { border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; background: #FFFFFF; }
   .po-risk .v { font-size: 24px; font-weight: 700; color: #111827; }
   .po-risk .v.hi { color: #B91C1C; } .po-risk .v.mid { color: #B45309; }
   .po-risk .l { font-size: 13px; color: #4B5563; }
-  /* day picker: horizontal radio drawn as a segmented control */
   [class*="st-key-scen_pick"] [role="radiogroup"] { gap: 0; flex-wrap: wrap; }
   [class*="st-key-scen_pick"] [role="radiogroup"] > label { margin: 0 -1px 4px 0; padding: 7px 16px; border: 1px solid #D1D5DB;
       background: #FFFFFF; cursor: pointer; }
@@ -144,10 +130,15 @@ st.markdown("""
   [class*="st-key-scen_pick"] [role="radiogroup"] > label:hover { background: #EFF6FF; }
   [class*="st-key-scen_pick"] [role="radiogroup"] > label:has(input:checked):hover { background: #0B5CAD; }
   .po-foot { font-size: 12px; color: #4B5563; overflow-wrap: anywhere; }
-  /* Long folder names in the sidebar box wrap instead of being cut off with "..." */
   [class*="st-key-results_dir"] [data-baseweb="select"] div { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; overflow: visible; }
   [data-testid="stSliderTickBarMin"], [data-testid="stSliderTickBarMax"] { color: #4B5563; }
-</style>""", unsafe_allow_html=True)
+</style>"""
+# One block, no comments or blank lines: Streamlit Cloud (newer Markdown renderer) shows a <style> block as text
+# if a blank line ends the HTML block. st.html is used when this Streamlit has it.
+if hasattr(st, "html"):
+    st.html(_CSS)
+else:
+    st.markdown(_CSS, unsafe_allow_html=True)
 
 
 # ------------------------------------------------------------------ results folder
