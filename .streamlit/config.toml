@@ -1,4 +1,4 @@
-# Clinical light theme for PulseOps (dashboard v2). Streamlit reads this file when started from the repo root:
+# Clinical light theme for KnightAI (dashboard v2). Streamlit reads this file when started from the repo root:
 #     streamlit run src/dashboard/app_v2.py
 # Streamlit Community Cloud also reads .streamlit/config.toml from the repo root.
 [theme]

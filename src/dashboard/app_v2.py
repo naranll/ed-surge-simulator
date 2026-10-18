@@ -1,4 +1,4 @@
-"""PulseOps - ED Surge Simulator (dashboard v2): a plain-words what-if tool for a hospital planner / charge nurse.
+"""KnightAI - ED Surge Simulator (dashboard v2): a plain-words what-if tool for a hospital planner / charge nurse.
 
 Run from the repo root (the theme comes from .streamlit/config.toml there):
     streamlit run src/dashboard/app_v2.py
@@ -31,9 +31,8 @@ from src.simulation.hospital import (HOSPITAL_PARAMETERS, PRESETS, HospitalConfi
 from src.simulation.scenarios import (ATS_TARGET, BURST_SIZE_RANGE, PARAMETER_TABLE, SURGE_RANGES, TRIAGE_LEVEL_NOTE,  # noqa: E402
                                       truth_seed)
 
-PRODUCT = "PulseOps"                      # product name used in README.md
+PRODUCT = "KnightAI"                      # product name used in README.md
 SUBTITLE = "ED Surge Simulator"
-TEAM = "KnightAI"
 # Clinical palette: medical blue (primary), green (good / recommended), amber and red only for warnings.
 BLUE, GREEN, AMBER, RED = "#0B5CAD", "#15803D", "#B45309", "#B91C1C"
 GREY_LINE = "#6B7280"                     # 'normal day' reference line in charts
@@ -89,7 +88,6 @@ _CSS = """<style>
   .po-pills { display: flex; gap: 8px; flex-wrap: wrap; }
   .po-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 13px;
              font-weight: 600; border: 1px solid transparent; white-space: nowrap; }
-  .po-team { background: #EFF6FF; color: #0B5CAD; border-color: #BFDBFE; }
   .po-lx { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
   .po-dot { width: 8px; height: 8px; border-radius: 50%; background: #15803D; display: inline-block; }
   .po-caveat { color: #4B5563; font-size: 14px; margin: 8px 0 4px 0; }
@@ -391,7 +389,7 @@ if lx:
               f"total {lx.get('total_seconds')} s, tests: {lx.get('tests_summary')}")
     lx_pill = f'<span class="po-pill po-lx" title="{tip}"><span class="po-dot"></span>Ran on IBM LinuxONE (s390x)</span>'
 st.markdown(f'<div class="po-hdr"><div class="po-brand"><span class="po-word">{PRODUCT}</span><span class="po-sub">{SUBTITLE}</span></div>'
-            f'<div class="po-pills"><span class="po-pill po-team">{TEAM}</span>{lx_pill}</div></div>', unsafe_allow_html=True)
+            f'<div class="po-pills">{lx_pill}</div></div>', unsafe_allow_html=True)
 st.caption(CAVEAT_LINE)
 with st.expander("About these numbers"):
     st.caption(CAVEAT)
