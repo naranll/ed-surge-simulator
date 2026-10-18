@@ -64,7 +64,7 @@ st.set_page_config(page_title=f"{PRODUCT} - {SUBTITLE}", page_icon=None, layout=
 # Light clinical look. Colours and fonts come from .streamlit/config.toml (repo root); this block only styles the page's
 # own cards and fixes contrast where Streamlit fades text (captions, widget labels) below WCAG AA.
 _CSS = """<style>
-  .block-container { max-width: 1240px; padding-top: 1.6rem; padding-bottom: 3rem; }
+  .block-container, [data-testid="stMainBlockContainer"] { max-width: 1240px; padding-top: 5rem; padding-bottom: 3rem; }
   h1, h2, h3, h4 { color: #111827; }
   [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] * { color: #4B5563 !important; opacity: 1 !important; }
   [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label { color: #1F2937; font-weight: 600; }
@@ -116,6 +116,7 @@ _CSS = """<style>
   .po-risk .v { font-size: 24px; font-weight: 700; color: #111827; }
   .po-risk .v.hi { color: #B91C1C; } .po-risk .v.mid { color: #B45309; }
   .po-risk .l { font-size: 13px; color: #4B5563; }
+  [class*="st-key-scen_pick"] { margin-bottom: -.5rem; }
   [class*="st-key-scen_pick"] [role="radiogroup"] { gap: 0; flex-wrap: wrap; }
   [class*="st-key-scen_pick"] [role="radiogroup"] label { margin: 0 -1px 4px 0; padding: 7px 16px; border: 1px solid #D1D5DB; background: #FFFFFF; cursor: pointer; }
   [class*="st-key-scen_pick"] [role="radiogroup"] > label:first-of-type, [class*="st-key-scen_pick"] [role="radiogroup"] > div:first-of-type label { border-radius: 8px 0 0 8px; }
@@ -126,6 +127,7 @@ _CSS = """<style>
   [class*="st-key-scen_pick"] [role="radiogroup"] label:has(input:checked) p { color: #FFFFFF; }
   [class*="st-key-scen_pick"] [role="radiogroup"] label:hover { background: #EFF6FF; }
   [class*="st-key-scen_pick"] [role="radiogroup"] label:has(input:checked):hover { background: #0B5CAD; }
+  @media (max-width: 700px) { [class*="st-key-scen_pick"] [role="radiogroup"] { gap: 6px; } [class*="st-key-scen_pick"] [role="radiogroup"] label { margin: 0 !important; border-radius: 8px !important; } }
   .po-foot { font-size: 12px; color: #4B5563; overflow-wrap: anywhere; }
   [class*="st-key-results_dir"] [data-baseweb="select"] div { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; overflow: visible; }
   [data-testid="stSliderTickBarMin"], [data-testid="stSliderTickBarMax"] { color: #4B5563; }
@@ -402,7 +404,6 @@ with st.expander("About these numbers"):
         "- **Early warning** shows the chance that something breaks in the next 4 hours. It is learned from the simulator, not from a real hospital.")
 
 # ------------------------------------------------------------------ day picker
-st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
 # A horizontal radio styled as a segmented control (st.segmented_control in single mode is not supported by AppTest).
 seg_key = f"scen_pick_{scenario}"       # re-created whenever the sidebar box changes, so both always agree
 st.radio("Day type", list(KEY2LABEL), index=list(KEY2LABEL).index(scenario), format_func=lambda x: SHORT.get(x, x),
