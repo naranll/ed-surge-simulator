@@ -61,7 +61,8 @@ def test_volume_scale_thins_patients_repeatably():
 def test_generate_day_range_and_delegation():
     t1, i1 = generate_day("heatwave", truth_seed(2))
     t2, i2 = generate("heatwave", truth_seed(2))
-    assert t1 == t2 and i1 == i2                                    # no intensity -> same as generate()
+    assert t1 == t2                                                 # no intensity -> the same day as generate()
+    assert {k: i1[k] for k in i2} == i2                             # same advance info (the registry only adds "components")
     from src.simulation.scenarios import USE_LEGACY_PARAMS
     if USE_LEGACY_PARAMS:                                           # the legacy switch has no sampled surge range, so a fixed size is ignored
         return

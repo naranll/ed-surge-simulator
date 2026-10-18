@@ -1,0 +1,23 @@
+Scenario: compound   (surge known in advance: True, from day_before, window (0, 24), burst possible: True)
+Look-ahead seeds: 50   Truth seeds: 50   Plans tested: 78   Mode: full
+Look-ahead pick : 12:00-18:00 +1 clinician, fast track
+RECOMMENDED     : 12:00-18:00 +1 clinician, fast track
+Why             : Recommended: paired gain +19.67 points (95% range +15.81 to +23.52) on 50 truth days, fairness limit holds.
+Cost            : $1,050 = 6 staff-hours (costs are UNSOURCED, illustrative)
+Truth check     : urgent on time 61.1% -> 78.6%, non-urgent median wait 113.2 -> 40.8 min (-64%), LWBS 29.2 -> 10.2
+Caution         : A sudden burst of urgent patients is possible on this day. The forecast cannot include it (its hour is unknown), so the plan was not tested against one.
+
+Plan                                                 OnTime%  NU wait NU chg%  LWBS StaffH  Cost$   Score  Gain vs nothing (95%) Fair  Flag
+12:00-18:00 +1 clinician, fast track                    82.2     39.4     -68   7.0      6   1050    71.3   +19.6 +15.5..+23.6  yes  RECOMMENDED
+12:00-18:00 +1 clinician, fast track, boarding -25%     83.1     38.9     -68   7.2      6   1300    70.4   +18.6 +14.6..+22.5  yes  
+12:00-18:00 +1 clinician                                80.6     53.6     -56   9.0      6    900    69.8   +18.0 +14.5..+21.6  yes  
+12:00-18:00 +1 clinician, fast track, boarding -50%     84.0     37.9     -69   7.0      6   1550    69.6   +17.9 +13.8..+22.0  yes  
+12:00-18:00 +1 clinician, boarding -25%                 80.8     53.9     -56   9.0      6   1150    68.3   +16.5 +13.0..+20.0  yes  
+12:00-18:00 +1 clinician, boarding -50%                 82.1     53.1     -57   9.2      6   1400    67.7   +15.9 +12.2..+19.6  yes  
+15:00-21:00 +1 clinician, fast track                    79.2     46.0     -62  10.8      6   1050    66.5   +14.7 +11.6..+17.9  yes  
+15:00-21:00 +1 clinician                                77.8     62.2     -49  12.5      6    900    65.3   +13.5 +10.8..+16.2  yes  
+15:00-21:00 +1 clinician, fast track, boarding -25%     79.5     45.0     -63  10.7      6   1300    65.1   +13.3 +10.1..+16.5  yes  
+09:00-15:00 +1 clinician, fast track                    78.5     39.2     -68  12.1      6   1050    65.0   +13.3 +9.7..+16.8   yes  
+Do nothing                                              65.0    122.6      +0  26.4      0      0    51.8    +0.0 +0.0..+0.0    yes  
+(11 of 78 plans shown; use --top 0 to show all)
+Gain = score points over do nothing (1 point = 1 percentage point of urgent patients seen on time, after cost and LWBS penalties). Costs are UNSOURCED, illustrative; StaffH = staff-hours.

@@ -37,7 +37,8 @@ from src.simulation.scenarios import lookahead_seed, truth_seed
 
 warnings.filterwarnings("ignore")
 SEED = 20261018
-SURGE = ["heatwave", "hurricane", "hurricane_burst"]
+from src.simulation import registry  # noqa: E402
+SURGE = [k for k in registry.names() if k != "normal"]   # compound is only ever a TEST scenario in leave-one-out
 ALL = ["normal"] + SURGE
 FPR = 0.05
 SENTENCE = ("This model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, "

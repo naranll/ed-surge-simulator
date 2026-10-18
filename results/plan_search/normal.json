@@ -7,7 +7,8 @@
   "surge_known": false,
   "known_from": "n/a",
   "window": null,
-  "burst_possible": false
+  "burst_possible": false,
+  "components": []
  },
  "selected": {
   "label": "09:00-15:00 fast track",
@@ -2081,5 +2082,5 @@
   }
  ],
  "hospital": "Large",
- "seconds": 39.9
+ "seconds": 12.6
 }

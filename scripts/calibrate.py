@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
+import time
 import itertools
 import statistics as st
 
@@ -51,7 +53,8 @@ def simulate(cfg, days, scenario="normal"):
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--quick", action="store_true", help="8 days per setting; never writes configs/capacity.json")
+    ap.add_argument("--no-write-capacity", action="store_true", help="full mode, but leave configs/capacity.json as it is")
     a = ap.parse_args(argv)
     days = 8 if a.quick else 30
     RESULTS.mkdir(exist_ok=True)
@@ -71,7 +74,8 @@ def main(argv=None) -> int:
     real_hour = {int(h): float(g["PATWT"].sum() / hrs["PATWT"].sum()) for h, g in hrs.groupby(hrs["arrival_hour"].astype(int))}
 
     grid = []
-    for beds, docs, nurses in itertools.product((35, 40, 45, 50, 55, 60), (3, 4, 5, 6, 7), (3,)):
+    grid_spec = {"beds": [35, 40, 45, 50, 55, 60], "doctors": [3, 4, 5, 6, 7], "triage_nurses": [3]}
+    for beds, docs, nurses in itertools.product(grid_spec["beds"], grid_spec["doctors"], grid_spec["triage_nurses"]):
         cfg = HospitalConfig(beds=beds, doctors=docs, triage_nurses=nurses, patient_flow=True)
         r = simulate(cfg, days)
         g = {"beds": beds, "doctors": docs, "triage_nurses": nurses,
@@ -110,9 +114,40 @@ def main(argv=None) -> int:
         w.writerow([])
         w.writerow(["chosen capacity (ASSUMPTION set by calibration)", f"beds={best['beds']}", f"doctors={best['doctors']}", f"triage nurses={best['triage_nurses']}; {days} simulated days"])
     print(f"chosen: beds {best['beds']}, doctors {best['doctors']}, triage nurses {best['triage_nurses']}")
+    if not a.quick and not a.no_write_capacity:
+        write_capacity(best, rows, days, grid_spec)
     for q, a_, b_, n_ in rows:
         print(f"  {q:<48} real {a_ if a_ == '' else round(a_, 2)!s:>8}  sim {round(b_, 2)!s:>8}")
     return 0
+
+
+def write_capacity(best: dict, rows: list, days: int, grid_spec: dict) -> None:
+    """The single capacity source of truth. Keeps the preset volume shares already in the file."""
+    from src.simulation import capacity
+    path = capacity.path()
+    old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    shares = old.get("preset_volume_shares") or {
+        "values": {"Small": 0.3, "Medium": 0.6, "Large": 1.0},
+        "source": "UNSOURCED: illustrative volume shares (30% / 60% / 100% of the reference). Small and Medium are NOT calibrated."}
+    data = {
+        "schema_version": 1,
+        "reference_hospital": {"beds": int(best["beds"]), "doctors": int(best["doctors"]), "triage_nurses": int(best["triage_nurses"]),
+                               "preset_name": "Large"},
+        "patients_per_day": {"value": 200, "source": "UNSOURCED: scenarios.BASE_VOLUME, a Monday assumption (NHAMCS has no per-ED volume)"},
+        "source": ("Calibrated by scripts/calibrate.py (full mode) against NHAMCS 2022: urgent (triage 1-3) median WAITTIME and the LWBS "
+                   "share, PATWT-weighted, with real-data admission and care times (models/patient_flow/admission_lookup.json). "
+                   "NHAMCS has no bed or staff counts, so capacity is FITTED, not measured."),
+        "method": {"simulated_days_per_setting": days, "search_grid": grid_spec,
+                   "search_grid_source": "UNSOURCED: candidate range chosen by the team",
+                   "not_saturated_rule": f"average peak bed occupancy under {PEAK_MAX:.0f}% (UNSOURCED design rule)",
+                   "loss": "|sim urgent median wait - real| / real + |sim LWBS - real| / real (+10 if saturated)"},
+        "fit": [{"quantity": q, "real_NHAMCS_2022": (None if a_ == "" else round(a_, 2)), "simulated": round(b_, 2)} for q, a_, b_, _ in rows[:3]],
+        "preset_volume_shares": shares,
+        "written": time.strftime("%Y-%m-%d"),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {path}")
 
 
 if __name__ == "__main__":

@@ -15,18 +15,19 @@
     "streamlit": "1.46.0",
     "pytest": "8.3.5"
   },
-  "tests_summary": "143 passed in 52.64s",
+  "tests_summary": "147 passed, 1 warning in 58.92s",
   "mode": "full",
-  "finished": "2026-10-18 06:56:05",
+  "finished": "2026-10-18 09:48:33",
   "seconds_per_step": {
-    "tests": 54.9,
-    "scenarios_and_plan_search": 138.3,
-    "early_warning_data": 22.5,
-    "parallel_timing": 38.2,
-    "calibration": 11.2,
-    "patient_flow_model": 50.8,
-    "early_warning_model": 112.9,
-    "plots": 3.2
+    "tests": 62.1,
+    "scenarios_and_plan_search": 79.4,
+    "early_warning_data": 33.7,
+    "parallel_timing": 53.2,
+    "calibration": 13.2,
+    "patient_flow_model": 45.7,
+    "early_warning_model": 120.6,
+    "demo_results": 3.2,
+    "plots": 2.7
   },
   "step_status": {
     "tests": "ok",
@@ -35,35 +36,36 @@
     "calibration": "ok",
     "patient_flow_model": "ok",
     "early_warning_model": "ok",
+    "demo_results": "ok",
     "plots": "ok"
   },
   "parallel_timing": [
     {
       "workers": 1,
-      "seconds": 11.23,
-      "days": 800,
+      "seconds": 13.97,
+      "days": 1000,
       "speedup_vs_1_worker": 1.0
     },
     {
       "workers": 2,
-      "seconds": 7.43,
-      "days": 800,
-      "speedup_vs_1_worker": 1.51
+      "seconds": 9.62,
+      "days": 1000,
+      "speedup_vs_1_worker": 1.45
     },
     {
       "workers": 4,
-      "seconds": 5.85,
-      "days": 800,
-      "speedup_vs_1_worker": 1.92
+      "seconds": 9.45,
+      "days": 1000,
+      "speedup_vs_1_worker": 1.48
     },
     {
       "workers": 8,
-      "seconds": 5.29,
-      "days": 800,
-      "speedup_vs_1_worker": 2.12
+      "seconds": 9.11,
+      "days": 1000,
+      "speedup_vs_1_worker": 1.53
     }
   ],
-  "total_seconds": 434.0,
+  "total_seconds": 416.4,
   "workers_used": 8,
   "note": "Timing is wall-clock on this machine. More workers are not always faster for small jobs; compare the table, do not assume."
 }

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from src.optimization.optimizer import DAY_MIN, Plan, boarding_cut_shim, compute_metrics
-from src.simulation import patient_flow
+from src.simulation import capacity, patient_flow
 from src.simulation.ed_simulator import ATS_TARGET, Action, EDSim
 from src.simulation.scenarios import CAPACITY
 
@@ -65,13 +65,20 @@ class HospitalConfig:
         }
 
 
-# Reference hospitals. Capacities are ASSUMPTIONS (NHAMCS has no bed counts). "Large" was set by calibration
-# (results/calibration.csv); Small and Medium are the same design scaled by patient volume (30% / 60%) and are NOT separately calibrated.
-PRESETS = {
-    "Small": HospitalConfig(beds=18, triage_nurses=1, doctors=2, patient_flow=True, volume_scale=0.3),     # ~60 patients/day
-    "Medium": HospitalConfig(beds=36, triage_nurses=2, doctors=3, patient_flow=True, volume_scale=0.6),    # ~120 patients/day
-    "Large": HospitalConfig(beds=60, triage_nurses=3, doctors=4, patient_flow=True, volume_scale=1.0),     # ~200/day: the calibrated one
-}
+# Reference hospitals come from configs/capacity.json (ONE source of truth, written by scripts/calibrate.py).
+# "Large" is the calibrated reference; Small and Medium are the same design scaled by an UNSOURCED volume share.
+def _build_presets() -> dict:
+    try:
+        specs = capacity.preset_specs()
+    except FileNotFoundError as err:          # only while bootstrapping: calibrate.py creates the file
+        import sys
+        print(f"warning: {err}", file=sys.stderr)
+        return {}
+    return {name: HospitalConfig(beds=v["beds"], triage_nurses=v["triage_nurses"], doctors=v["doctors"],
+                                 patient_flow=True, volume_scale=v["volume_scale"]) for name, v in specs.items()}
+
+
+PRESETS = _build_presets()
 
 
 def prepare(cfg: HospitalConfig, patients: Sequence) -> list:
@@ -122,12 +129,43 @@ def run_day(cfg: HospitalConfig, patients: Sequence, plan: Optional[Plan] = None
     return sim
 
 
-def runner_for(cfg: HospitalConfig):
+@dataclass(frozen=True)
+class HospitalRunner:
+    """``runner(plan, patients)`` that scores a plan on ONE hospital. Picklable, so the plan search can use a worker pool."""
+    cfg: HospitalConfig
+    parallel_safe = True
+
+    def __call__(self, plan: Plan, patients: Sequence):
+        return compute_metrics(run_day(self.cfg, patients, plan), 0.0, DAY_MIN)
+
+    def diagnose(self, patients: Sequence) -> str:
+        """Which resource limits a "do nothing" day for these patients (used when no tested plan helps)."""
+        return binding_constraint(run_day(self.cfg, patients))
+
+
+# UNSOURCED rule of thumb (our choice): admitted patients waiting for a ward on 25% or more of the beds = boarding is
+# the constraint; otherwise a resource busy 90% or more of the time is; otherwise the busiest resource is named.
+BOARDING_BED_SHARE = 0.25
+BUSY_SHARE = 0.90
+
+
+def binding_constraint(sim: EDSim) -> str:
+    """'boarding', 'beds' or 'staff (...)', read from a finished or running simulation (time-weighted, read only)."""
+    util = {k: (sim.area[k] / sim.carea[k] if sim.carea[k] > 0 else 0.0) for k in "ndb"}
+    s = sim.samples
+    board = (sum(x.get("board_admitted", 0) for x in s) / len(s) / max(sim.cap["b"], 1)) if s else 0.0
+    if board >= BOARDING_BED_SHARE:
+        return f"boarding (admitted patients waiting for a ward hold {100 * board:.0f}% of beds)"
+    named = {"beds": util["b"], "staff (doctors)": util["d"], "staff (triage nurses)": util["n"]}
+    top = max(named, key=named.get)
+    if named[top] >= BUSY_SHARE:
+        return f"{top} ({100 * named[top]:.0f}% busy)"
+    return f"{top} (busiest resource, {100 * named[top]:.0f}% busy; none is saturated)"
+
+
+def runner_for(cfg: HospitalConfig) -> HospitalRunner:
     """A ``runner(plan, patients)`` for the optimiser's plan_search / select_plan (so plans are scored on THIS hospital)."""
-    def run(plan: Plan, patients: Sequence):
-        sim = run_day(cfg, patients, plan)
-        return compute_metrics(sim, 0.0, DAY_MIN)
-    return run
+    return HospitalRunner(cfg)
 
 
 # ------------------------------------------------------------------ measuring
@@ -167,7 +205,8 @@ def day_metrics(sim: EDSim, cfg: HospitalConfig, t_end: float = DAY_MIN) -> dict
         "timeline": {"hour": [x["t"] / 60.0 for x in s],
                      "queue": [x["tri_q"] + x["prov_q"] for x in s],
                      "bed_pct": [100.0 * x["beds"] / beds for x in s],
-                     "boarders": [x["board"] for x in s]},
+                     "boarders": [x.get("board_admitted", x["board"]) for x in s],     # ADMITTED patients waiting for a ward
+                     "in_bed_after_consult": [x["board"] for x in s]},
     }
 
 
@@ -200,39 +239,22 @@ def snapshot_features(sim: EDSim, cfg: HospitalConfig, arrivals_last_hour: int) 
 
 
 # ------------------------------------------------------------------ a day with a chosen surge size
-def generate_day(name: str, seed: int, intensity: Optional[float] = None, burst: bool = False):
-    """Like scenarios.generate(), but the surge size can be FIXED by the user.
+def generate_day(name: str, seed: int, intensity=None, burst: bool = False):
+    """The true day for scenario ``name`` from the scenario registry (src/simulation/registry.py).
 
-    ``intensity`` is the extra share of patients (0.10 = +10%). It must stay inside the published range
-    (heatwave +6% to +13%, hurricane +9% to +13%); anything else is refused. None = sample like generate().
+    ``intensity``: None = sample the surge size like generate(); a number (single-component scenario) or
+    {component: extra share} fixes it, and it must stay inside the published range.
     """
-    from src.simulation import scenarios as S
-    if intensity is None or name not in S.SURGE_RANGES or S.USE_LEGACY_PARAMS:
-        return S.generate(name, seed, burst=burst)
-    r = S.SURGE_RANGES[name]
-    m = 1.0 + float(intensity)
-    if not (r["low"] - 1e-9 <= m <= r["high"] + 1e-9):
-        raise ValueError(f"{name} surge must stay between +{(r['low'] - 1) * 100:.0f}% and +{(r['high'] - 1) * 100:.0f}% (published range)")
-    sc = S._CURRENT_SCENARIOS[name]
-    volume = S.BASE_VOLUME * S.weekday_factor("monday")
-    vs = random.Random(f"{seed}:volume")
-    vs.random()                      # the surge draw is skipped: the size is fixed
-    factors = S.hourly_multipliers(name, m, hourly=S._CURRENT_HOURLY)
-    rows = []
-    for h in range(24):
-        count = S._poisson_from_u(vs.random(), volume * S._CURRENT_HOURLY[h] * factors[h])
-        rows += S._hour_rows(seed, h, count, sc.acuity, sc.admit, sc.boarding_mult)
-    if burst:
-        rows += S._burst_rows(seed)
-    return S._to_arrivals(rows), S.scenario_info(name)
+    from src.simulation import registry
+    return registry.generate(name, seed, burst=burst, intensity=intensity)
 
 
 # ------------------------------------------------------------------ parameters added with the hospital / patient-flow / warning layers
 HOSPITAL_PARAMETERS = [
     {"name": "Hospital presets (beds / nurses / doctors / volume)", "tag": "ASSUMPTION", "status": "unverified",
      "value": {k: [c.beds, c.triage_nurses, c.doctors, c.volume_scale] for k, c in PRESETS.items()},
-     "note": "NHAMCS has no bed or staff counts. 'Large' (60 beds, 3 nurses, 4 doctors, ~200 patients/day) was picked by scripts/calibrate.py to match NHAMCS waits, "
-             "left-unseen share and care times; Small and Medium are the same design scaled by volume and are NOT separately calibrated."},
+     "note": ("NHAMCS has no bed or staff counts. Read from configs/capacity.json: the reference hospital was fitted by scripts/calibrate.py "
+              "to NHAMCS urgent waits and left-unseen share; Small and Medium are that design scaled by an UNSOURCED volume share and are NOT calibrated.")},
     {"name": "Admission chance by triage level x age band", "tag": "DATA", "status": "verified",
      "value": "models/patient_flow/admission_lookup.json",
      "note": "NHAMCS 2022, PATWT-weighted, ADMITHOS == 1; small cells blended toward the triage rate (shrinkage k=10, an ASSUMPTION)."},

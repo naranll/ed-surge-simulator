@@ -3,6 +3,7 @@ Look-ahead seeds: 50   Truth seeds: 50   Plans tested: 78   Mode: full
 Look-ahead pick : 12:00-18:00 +1 clinician
 RECOMMENDED     : 12:00-18:00 +1 clinician
 Why             : Recommended: paired gain +8.49 points (95% range +5.08 to +11.91) on 50 truth days, fairness limit holds.
+Cost            : $900 = 6 staff-hours (costs are UNSOURCED, illustrative)
 Truth check     : urgent on time 77.7% -> 87.9%, non-urgent median wait 51.3 -> 15.6 min (-70%), LWBS 12.1 -> 2.9
 Caution         : A sudden burst of urgent patients is possible on this day. The forecast cannot include it (its hour is unknown), so the plan was not tested against one.
 
@@ -19,4 +20,4 @@ Plan                                                 OnTime%  NU wait NU chg%  L
 12:00-18:00 +1 clinician, fast track, boarding -50%     91.7     10.2     -79   1.4      6   1550    80.2    +1.9 -1.5..+5.3    yes  
 Do nothing                                              82.8     49.6      +0   8.9      0      0    78.3    +0.0 +0.0..+0.0    yes  
 (11 of 78 plans shown; use --top 0 to show all)
-Gain = score points over do nothing (1 point = 1 percentage point of urgent patients seen on time, after cost and LWBS penalties).
+Gain = score points over do nothing (1 point = 1 percentage point of urgent patients seen on time, after cost and LWBS penalties). Costs are UNSOURCED, illustrative; StaffH = staff-hours.

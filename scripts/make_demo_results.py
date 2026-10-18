@@ -60,6 +60,9 @@ def main() -> int:
     except Exception as err:
         out["early_warning_example"] = f"not available: {err}"
     lx, local = jload(RESULTS / "linuxone_run.json"), jload(RESULTS / "local_run.json")
+    if lx and lx.get("uname_m") != "s390x":     # only a run that really happened on s390x counts as LinuxONE
+        out["linuxone_file_rejected"] = f"results/linuxone_run.json says machine {lx.get('uname_m')!r}, not s390x"
+        lx = None
     out["linuxone"] = ({k: lx.get(k) for k in ("uname_m", "nproc", "python", "total_seconds", "seconds_per_step", "parallel_timing")} if lx
                        else "No LinuxONE run recorded yet")
     if local and not lx:

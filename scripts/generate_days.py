@@ -11,7 +11,7 @@ For each snapshot at time t the row holds
       y_lwbs        : at least 1 patient leaves without being seen in the window          [ASSUMPTION]
   * first_breach_*: minute of the first real breach of the day (for warning lead time).
 
-Four scenario types: normal, heatwave, hurricane, hurricane_burst. Day number n -> truth seed truth_seed(n); the
+Every scenario of src/simulation/registry.py (normal, heatwave, hurricane, hurricane_burst, compound). Day number n -> truth seed truth_seed(n); the
 look-ahead seeds the optimiser uses (lookahead_seed) are a disjoint range. The hospital size cycles
 Small / Medium / Large with n. Output: results/early_warning_snapshots.csv.gz (not committed).
 
@@ -34,10 +34,10 @@ from _common import RESULTS, ROOT  # noqa: F401  (puts the repo on sys.path)
 from models.predict_risk import FEATURES, build_features
 from src.simulation.ed_simulator import ATS_TARGET
 from src.simulation.hospital import PRESETS, prepare, run_day
-from src.simulation.scenarios import generate, lookahead_seed, truth_seed
+from src.simulation import registry
+from src.simulation.scenarios import lookahead_seed, truth_seed
 
-SCENARIOS = [("normal", "normal", False), ("heatwave", "heatwave", False),
-             ("hurricane", "hurricane", False), ("hurricane_burst", "hurricane", True)]
+SCENARIOS = [(k, k, False) for k in registry.names()]     # every scenario of the one registry
 PRESET_NAMES = list(PRESETS)
 STEP, HORIZON, DAY = 30.0, 240.0, 1440.0
 L1_GRACE = 10.0                  # ASSUMPTION: a level-1 patient is "late" after 10 min (the ATS target of 0 is unreachable)
@@ -52,7 +52,7 @@ def _target(ats: int) -> float:
 
 def one_day(job: tuple) -> list:
     key, name, burst, n = job
-    truth, info = generate(name, truth_seed(n), burst=burst)
+    truth, info = registry.generate(name, truth_seed(n), burst=burst)
     cfg = PRESETS[PRESET_NAMES[n % len(PRESET_NAMES)]]
     pats = prepare(cfg, truth)
     snaps = []
@@ -112,7 +112,7 @@ def generate_days(days: int, workers: int = 1, out=OUT, quiet: bool = False) -> 
     info = {"days_per_scenario": days, "total_days": len(jobs), "snapshots": len(df), "workers": workers,
             "seconds": round(secs, 2), "seconds_per_day": round(secs / len(jobs), 4), "file": str(out)}
     if not quiet:
-        base = {k: round(float(df[df.scenario == k][c].mean()), 3) for k in ("normal", "heatwave", "hurricane", "hurricane_burst")
+        base = {k: round(float(df[df.scenario == k][c].mean()), 3) for k in registry.names()
                 for c in ("y_urgent_late",)} if len(df) else {}
         print(f"{len(jobs)} days, {len(df)} snapshots in {secs:.1f}s ({workers} worker(s)); share of snapshots with urgent_late=1 by scenario: {base}")
     return info
@@ -139,7 +139,7 @@ def benchmark(days: int = 25, worker_list=(1, 2, 4, 8)) -> list:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--days", type=int, default=750, help="days per scenario (4 scenarios)")
+    ap.add_argument("--days", type=int, default=750, help="days per scenario (every registry scenario)")
     ap.add_argument("--quick", action="store_true", help="60 days per scenario")
     ap.add_argument("--workers", type=int, default=min(4, os.cpu_count() or 1))
     ap.add_argument("--benchmark", action="store_true")
