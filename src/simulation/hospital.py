@@ -138,6 +138,30 @@ class HospitalRunner:
     def __call__(self, plan: Plan, patients: Sequence):
         return compute_metrics(run_day(self.cfg, patients, plan), 0.0, DAY_MIN)
 
+    def diagnose(self, patients: Sequence) -> str:
+        """Which resource limits a "do nothing" day for these patients (used when no tested plan helps)."""
+        return binding_constraint(run_day(self.cfg, patients))
+
+
+# UNSOURCED rule of thumb (our choice): admitted patients waiting for a ward on 25% or more of the beds = boarding is
+# the constraint; otherwise a resource busy 90% or more of the time is; otherwise the busiest resource is named.
+BOARDING_BED_SHARE = 0.25
+BUSY_SHARE = 0.90
+
+
+def binding_constraint(sim: EDSim) -> str:
+    """'boarding', 'beds' or 'staff (...)', read from a finished or running simulation (time-weighted, read only)."""
+    util = {k: (sim.area[k] / sim.carea[k] if sim.carea[k] > 0 else 0.0) for k in "ndb"}
+    s = sim.samples
+    board = (sum(x.get("board_admitted", 0) for x in s) / len(s) / max(sim.cap["b"], 1)) if s else 0.0
+    if board >= BOARDING_BED_SHARE:
+        return f"boarding (admitted patients waiting for a ward hold {100 * board:.0f}% of beds)"
+    named = {"beds": util["b"], "staff (doctors)": util["d"], "staff (triage nurses)": util["n"]}
+    top = max(named, key=named.get)
+    if named[top] >= BUSY_SHARE:
+        return f"{top} ({100 * named[top]:.0f}% busy)"
+    return f"{top} (busiest resource, {100 * named[top]:.0f}% busy; none is saturated)"
+
 
 def runner_for(cfg: HospitalConfig) -> HospitalRunner:
     """A ``runner(plan, patients)`` for the optimiser's plan_search / select_plan (so plans are scored on THIS hospital)."""
@@ -181,7 +205,8 @@ def day_metrics(sim: EDSim, cfg: HospitalConfig, t_end: float = DAY_MIN) -> dict
         "timeline": {"hour": [x["t"] / 60.0 for x in s],
                      "queue": [x["tri_q"] + x["prov_q"] for x in s],
                      "bed_pct": [100.0 * x["beds"] / beds for x in s],
-                     "boarders": [x["board"] for x in s]},
+                     "boarders": [x.get("board_admitted", x["board"]) for x in s],     # ADMITTED patients waiting for a ward
+                     "in_bed_after_consult": [x["board"] for x in s]},
     }
 
 

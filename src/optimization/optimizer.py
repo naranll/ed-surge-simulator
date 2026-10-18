@@ -225,7 +225,8 @@ def recommend(snapshot: EDSim, scenario: Scenario = SCENARIOS["normal"], seeds: 
         _ci(wait)[0], _ci(wait), _ci(pct)[0], _ci(pct), _ci(dl), pareto, table,
         summarize(base), summarize(br),
         {"t": t0, "triage_q": snapshot.cnt["tri_q"], "provider_q": snapshot.cnt["bed_q"] + snapshot.cnt["doc_q"],
-         "boarders": snapshot.cnt["board"], "beds_busy": snapshot.busy["b"], "beds_cap": snapshot.cap["b"],
+         "boarders": snapshot.cnt["board"],   # legacy meaning: everyone in a bed after the consult (kept for the old briefing)
+         "admitted_boarders": getattr(snapshot, "board_admitted", None), "beds_busy": snapshot.busy["b"], "beds_cap": snapshot.cap["b"],
          "docs_busy": snapshot.busy["d"], "docs_cap": snapshot.cap["d"]},
         res)
 
