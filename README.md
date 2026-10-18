@@ -193,6 +193,7 @@ flowchart LR
 | Plan search (whole day)       | Tests an extra doctor for 6 hours, fast track and faster ward transfers at different start times on the same random days.                            | `src/optimization/optimizer.py`                            |
 | Live demo (next 4 hours)      | Same rules as the plan search, applied to the next 4 hours of a live day.                                                                            | `run.py`, `src/demo/live_demo.py`                          |
 | Dashboard                     | A what-if page for a hospital planner (laptop only).                                                                                                 | `src/dashboard/app_v2.py`                                  |
+| Digital Twin (React)          | Interactive React + TypeScript digital twin with 4-hour ML early warning surrogate, hospital presets, and bed simulation.                           | `frontend/`, `python run.py twin`                          |
 | One-command run               | Tests, scenarios and plan search, both models, timing.                                                                                               | `run_all.py`                                               |
 
 ### Scenarios

@@ -336,10 +336,17 @@ def simulate(snapshot: Optional[EDSim] = None, arrivals: Optional[Sequence[Arriv
 class LiveED:
     """Ground-truth day: noisy arrival stream advanced in real time."""
 
-    def __init__(self, scenario: Scenario, seed: int = 42, noise: float = 0.08, hours: float = 24):
+    def __init__(self, scenario: Scenario, seed: int = 42, noise: float = 0.08, hours: float = 24,
+                 nurses: int = CAPACITY["nurses"], docs: int = CAPACITY["docs"],
+                 beds: int = CAPACITY["beds"], per_patient_stay: bool = False,
+                 volume_scale: float = 1.0):
         self.scenario = scenario
-        self.arrivals = generate_arrivals(scenario, seed, 0.0, hours * 60.0, noise=noise)
-        self.sim = EDSim()
+        arrivals = generate_arrivals(scenario, seed, 0.0, hours * 60.0, noise=noise)
+        if volume_scale < 1.0:
+            import random
+            arrivals = [a for a in arrivals if random.Random(f"thin:{a.pid}:{a.t:.4f}").random() < volume_scale]
+        self.arrivals = arrivals
+        self.sim = EDSim(nurses=nurses, docs=docs, beds=beds, per_patient_stay=per_patient_stay)
         self.sim.add_arrivals(self.arrivals)
 
     @property

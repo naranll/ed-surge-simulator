@@ -13,7 +13,9 @@ from src.simulation.scenarios import SCENARIOS, USE_LEGACY_PARAMS
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("cmd", choices=["demo", "rolling", "dashboard"], nargs="?", default="demo")
+    ap.add_argument("cmd", choices=["demo", "rolling", "dashboard", "twin"], nargs="?", default="demo")
+    ap.add_argument("--port", type=int, default=5173, help="Port to serve digital twin or dashboard on (default: 5173)")
+    ap.add_argument("--bind", default="0.0.0.0", help="Address to bind twin server to (default: 0.0.0.0)")
     ap.add_argument("--scenario", choices=registry.names(), default="compound")
     ap.add_argument("--hour", type=float, default=14.0)
     ap.add_argument("--seed", type=int, default=42)
@@ -22,7 +24,29 @@ def main() -> None:
                     help="forecast runs per action (default 30; ignored with ED_USE_LEGACY_PARAMS=1, which keeps the old 5)")
     a = ap.parse_args()
     if a.cmd == "dashboard":
-        sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py"]))
+        sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py", "--server.port", str(a.port), "--server.address", a.bind]))
+    if a.cmd == "twin":
+        from pathlib import Path
+        import http.server
+        import socketserver
+
+        dist_dir = Path(__file__).resolve().parent / "frontend" / "dist"
+        if not dist_dir.exists():
+            sys.exit(f"Error: {dist_dir} does not exist. Run 'npm run build' inside frontend/ first.")
+
+        class Handler(http.server.SimpleHTTPRequestHandler):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, directory=str(dist_dir), **kwargs)
+
+        socketserver.TCPServer.allow_reuse_address = True
+        with socketserver.TCPServer((a.bind, a.port), Handler) as httpd:
+            print(f"ED Surge Simulator: React Digital Twin serving at http://{a.bind}:{a.port}/")
+            print("Press Ctrl+C to terminate.")
+            try:
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                print("\nServer stopped.")
+                sys.exit(0)
     if USE_LEGACY_PARAMS:                       # the original behaviour, exactly as before
         if a.scenario not in SCENARIOS:
             sys.exit(f"scenario {a.scenario!r} is not available with ED_USE_LEGACY_PARAMS=1 (old scenarios: {list(SCENARIOS)})")
