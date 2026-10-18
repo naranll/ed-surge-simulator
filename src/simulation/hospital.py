@@ -207,31 +207,14 @@ def snapshot_features(sim: EDSim, cfg: HospitalConfig, arrivals_last_hour: int) 
 
 
 # ------------------------------------------------------------------ a day with a chosen surge size
-def generate_day(name: str, seed: int, intensity: Optional[float] = None, burst: bool = False):
-    """Like scenarios.generate(), but the surge size can be FIXED by the user.
+def generate_day(name: str, seed: int, intensity=None, burst: bool = False):
+    """The true day for scenario ``name`` from the scenario registry (src/simulation/registry.py).
 
-    ``intensity`` is the extra share of patients (0.10 = +10%). It must stay inside the published range
-    (heatwave +6% to +13%, hurricane +9% to +13%); anything else is refused. None = sample like generate().
+    ``intensity``: None = sample the surge size like generate(); a number (single-component scenario) or
+    {component: extra share} fixes it, and it must stay inside the published range.
     """
-    from src.simulation import scenarios as S
-    if intensity is None or name not in S.SURGE_RANGES or S.USE_LEGACY_PARAMS:
-        return S.generate(name, seed, burst=burst)
-    r = S.SURGE_RANGES[name]
-    m = 1.0 + float(intensity)
-    if not (r["low"] - 1e-9 <= m <= r["high"] + 1e-9):
-        raise ValueError(f"{name} surge must stay between +{(r['low'] - 1) * 100:.0f}% and +{(r['high'] - 1) * 100:.0f}% (published range)")
-    sc = S._CURRENT_SCENARIOS[name]
-    volume = S.BASE_VOLUME * S.weekday_factor("monday")
-    vs = random.Random(f"{seed}:volume")
-    vs.random()                      # the surge draw is skipped: the size is fixed
-    factors = S.hourly_multipliers(name, m, hourly=S._CURRENT_HOURLY)
-    rows = []
-    for h in range(24):
-        count = S._poisson_from_u(vs.random(), volume * S._CURRENT_HOURLY[h] * factors[h])
-        rows += S._hour_rows(seed, h, count, sc.acuity, sc.admit, sc.boarding_mult)
-    if burst:
-        rows += S._burst_rows(seed)
-    return S._to_arrivals(rows), S.scenario_info(name)
+    from src.simulation import registry
+    return registry.generate(name, seed, burst=burst, intensity=intensity)
 
 
 # ------------------------------------------------------------------ parameters added with the hospital / patient-flow / warning layers

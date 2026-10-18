@@ -38,11 +38,12 @@ def save(fig, name):
 
 
 def arrivals_chart():
-    from src.simulation.forecaster import forecast
-    from src.simulation.scenarios import scenario_info
+    from src.simulation import registry
     fig, ax = plt.subplots(figsize=(8, 4))
-    for name, col in (("normal", C["blue"]), ("heatwave", C["red"]), ("hurricane", C["orange"])):
-        ax.plot(range(24), forecast(scenario_info(name), 0, 24), label=name, color=col, lw=2)
+    cols = [C["blue"], C["red"], C["orange"], C["purple"], C["green"]]
+    for name, col in zip(registry.names(), cols):    # hurricane_burst has the same forecast as hurricane: the burst is never forecast
+        ax.plot(range(24), registry.forecast(registry.info(name), 0, 24), label=name, color=col, lw=2,
+                ls="--" if name == "hurricane_burst" else "-")
     ax.set_xlabel("hour of day")
     ax.set_ylabel("expected patients per hour (200/day reference)")
     ax.set_title("Expected arrivals per hour. Hour shape: NHAMCS 2022; surge sizes: published studies")

@@ -7,13 +7,14 @@ import argparse
 import subprocess
 import sys
 
+from src.simulation import registry
 from src.simulation.scenarios import SCENARIOS, USE_LEGACY_PARAMS
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("cmd", choices=["demo", "rolling", "dashboard"], nargs="?", default="demo")
-    ap.add_argument("--scenario", choices=list(SCENARIOS), default="compound")
+    ap.add_argument("--scenario", choices=registry.names(), default="compound")
     ap.add_argument("--hour", type=float, default=14.0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--workers", type=int, default=1)
@@ -21,6 +22,8 @@ def main() -> None:
     if a.cmd == "dashboard":
         sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py"]))
     if USE_LEGACY_PARAMS:                       # the original behaviour, exactly as before
+        if a.scenario not in SCENARIOS:
+            sys.exit(f"scenario {a.scenario!r} is not available with ED_USE_LEGACY_PARAMS=1 (old scenarios: {list(SCENARIOS)})")
         from src.dashboard.app import compute_view
         from src.optimization.optimizer import rolling
         from src.simulation.ed_simulator import LiveED
@@ -37,6 +40,7 @@ def main() -> None:
     if a.cmd == "demo":
         v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers)
         c = v["config"]
+        print(f"Scenario: {v['label']}. {v['description']}")
         print(f"Hospital: {c.effective_beds} beds, {c.doctors} doctors, {c.triage_capacity} triage nurses (configs/capacity.json)\n")
         print(v["rec"].headline(), "\n\n" + v["briefing"])
     else:

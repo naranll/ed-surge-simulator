@@ -18,13 +18,13 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from src.optimization.optimizer import OPTIMISER_PARAMETERS, plan_search  # noqa: E402
-from src.simulation import patient_flow  # noqa: E402
+from src.simulation import patient_flow, registry  # noqa: E402
 from src.simulation.hospital import (HOSPITAL_PARAMETERS, PRESETS, HospitalConfig, day_metrics, generate_day,  # noqa: E402
                                      run_day, runner_for)
 from src.simulation.scenarios import ATS_TARGET, PARAMETER_TABLE, SURGE_RANGES, TRIAGE_LEVEL_NOTE, truth_seed  # noqa: E402
 
 BLUE, ORANGE, GREEN, PURPLE, RED = "#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00"   # colour-blind-safe (Okabe-Ito)
-SCENARIOS = {"Normal Monday": "normal", "Heatwave": "heatwave", "Hurricane (receiving hospital)": "hurricane"}
+SCENARIOS = {registry.label(k): k for k in registry.names()}     # the one scenario registry
 CAVEAT = ("Simulation only: the numbers come from a computer model built on national survey data (NHAMCS 2022) and stated assumptions. "
           "It is not a real hospital and not medical advice.")
 MODEL_CAVEAT = ("The early-warning model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, "
@@ -68,7 +68,7 @@ def risk_timeline(cfg_d: dict, scenario: str, intensity, burst: bool, seed0: int
 def search_plan(cfg_d: dict, scenario: str, burst: bool, n_seeds: int) -> dict:
     cfg = _cfg(cfg_d)
     base = dataclasses.replace(cfg, boarding_cut=0.0, extra_staff_start=None)    # the search adds its own shift / transfer speed-up
-    res = plan_search(scenario, n_seeds=n_seeds, quick=False, burst=burst, runner=runner_for(base))
+    res = plan_search(scenario, n_seeds=n_seeds, quick=False, api=registry.api(), burst=burst, runner=runner_for(base))
     return res.to_dict()
 
 
@@ -128,16 +128,19 @@ extra = sb.checkbox("Add an extra doctor for 6 hours", key=f"extra_{k}", help="O
 start_h = sb.slider("Extra doctor starts at (hour)", 0, 18, 12, key=f"start_{k}", disabled=not extra, help="Hour of the day the extra shift begins.")
 
 sb.header("The day")
-scen_label = sb.selectbox("Day type", list(SCENARIOS), help="Normal Monday, a heatwave (more visits in the afternoon), or a hurricane (more visits all day at a receiving hospital).")
+scen_label = sb.selectbox("Day type", list(SCENARIOS), help="Normal Monday, heatwave, hurricane (receiving hospital), hurricane with a burst, or heatwave and hurricane together.")
 scenario = SCENARIOS[scen_label]
-if scenario in SURGE_RANGES:
-    lo, hi = round((SURGE_RANGES[scenario]["low"] - 1) * 100), round((SURGE_RANGES[scenario]["high"] - 1) * 100)
-    pct = sb.slider("Surge size (% extra patients)", lo, hi, (lo + hi) // 2, help=f"Limited to the published range (+{lo}% to +{hi}%). It cannot be set outside what studies reported.")
-    intensity = pct / 100.0
-else:
-    intensity = None
-burst = sb.checkbox("Add a sudden burst of very urgent patients", disabled=scenario == "normal",
-                    help="Stress test: 10-20 level 1-2 patients arrive within one hour. This size is our ASSUMPTION, not from a study.")
+sb.caption(registry.description(scenario))
+intensity = {}
+for comp in registry.info(scenario)["components"]:       # one slider per cited component, limited to its published range
+    lo, hi = round((SURGE_RANGES[comp]["low"] - 1) * 100), round((SURGE_RANGES[comp]["high"] - 1) * 100)
+    pct = sb.slider(f"{comp.capitalize()} surge size (% extra patients)", lo, hi, (lo + hi) // 2, key=f"surge_{comp}",
+                    help=f"Limited to the published range (+{lo}% to +{hi}%). It cannot be set outside what studies reported.")
+    intensity[comp] = pct / 100.0
+intensity = intensity or None
+built_in_burst = registry.REGISTRY[scenario]["burst"]
+burst = sb.checkbox("Add a sudden burst of very urgent patients", value=built_in_burst, disabled=scenario == "normal" or built_in_burst,
+                    help="Stress test: 10-20 level 1-2 patients arrive within one hour. This size is UNSOURCED (our assumption), not from a study.")
 seed0 = int(sb.number_input("Random seed (first day number)", 0, 9999, 0, help="Changes which random days are simulated. Same number = same days."))
 runs = int(sb.slider("Repeat runs (simulated days)", 3, 40, 10, help="More runs = steadier averages but a slightly slower page."))
 
@@ -162,7 +165,7 @@ base_d = dataclasses.asdict(dataclasses.replace(b, patient_flow=flow_ok))
 # ------------------------------------------------------------------ 1. key results
 chosen = mean_metrics(simulate_many(cfg_d, scenario, intensity, burst, seed0, runs))
 normal = mean_metrics(simulate_many(cfg_d, "normal", None, False, seed0, runs))
-st.subheader(f"1. Key results: {scen_label}" + (f" (+{round(intensity * 100)}%)" if intensity else "") + f", average of {runs} simulated days")
+st.subheader(f"1. Key results: {scen_label}" + (" (" + ", ".join(f"{c} +{round(v * 100)}%" for c, v in intensity.items()) + ")" if intensity else "") + f", average of {runs} simulated days")
 c = st.columns(5)
 dl = lambda a, b_, fmt="{:+.1f}": fmt.format(a - b_) + " vs normal day"
 c[0].metric("Urgent seen late", f"{chosen['urgent_late_pct']:.1f}%", dl(chosen["urgent_late_pct"], normal["urgent_late_pct"]), delta_color="inverse",

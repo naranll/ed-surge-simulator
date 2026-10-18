@@ -601,6 +601,11 @@ def run_batches(jobs: Sequence, workers: int = 1, runner=None) -> list:
 # ---- the scenario API (real or stub) ----------------------------------------
 def load_scenario_api() -> SimpleNamespace:
     """Import the real scenario/forecaster modules (written by another teammate) only when needed."""
+    try:   # CHANGED 2026-10-18: the scenario registry is the one definition of every scenario (same days for the old names)
+        from src.simulation import registry
+        return registry.api()
+    except ImportError:
+        pass
     try:
         from src.simulation import forecaster, scenarios
         return SimpleNamespace(

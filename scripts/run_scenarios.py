@@ -4,7 +4,7 @@
 Writes results/scenario_summary.csv (one row per scenario) and results/plan_search/<scenario>.json (+ .txt table).
 Standard library + pandas only. Safe to rerun (files are overwritten, never deleted).
 
-    python scripts/run_scenarios.py --seeds 50           (all three scenarios, full plan grid)
+    python scripts/run_scenarios.py --seeds 50           (every registry scenario, full plan grid)
     python scripts/run_scenarios.py --quick              (2 scenarios, 5 seeds, coarse grid)
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ import time
 from _common import RESULTS, ROOT  # noqa: F401  (puts the repo on sys.path)
 
 from src.optimization.optimizer import format_table, plan_search
-from src.simulation import patient_flow
+from src.simulation import patient_flow, registry
 from src.simulation.hospital import PRESETS, day_metrics, generate_day, run_day, runner_for
 from src.simulation.scenarios import truth_seed
 
@@ -29,7 +29,7 @@ def main(argv=None) -> int:
     ap.add_argument("--seeds", type=int, default=50)
     ap.add_argument("--preset", default="Large", choices=list(PRESETS))
     a = ap.parse_args(argv)
-    names = ["normal", "heatwave"] if a.quick else ["normal", "heatwave", "hurricane"]
+    names = ["normal", "heatwave"] if a.quick else registry.names()
     seeds = 5 if a.quick else a.seeds
     cfg = PRESETS[a.preset]
     if cfg.patient_flow and not patient_flow.available():
@@ -51,7 +51,7 @@ def main(argv=None) -> int:
                      "longest_queue": round(st.mean(m["longest_queue"] for m in ms), 1),
                      "ms_per_simulated_day": round(1000 * t_sim / seeds, 2)})
         t0 = time.time()
-        res = plan_search(name, n_seeds=seeds, quick=a.quick, runner=runner_for(cfg))
+        res = plan_search(name, n_seeds=seeds, quick=a.quick, api=registry.api(), runner=runner_for(cfg))
         secs = time.time() - t0
         (RESULTS / "plan_search" / f"{name}.json").write_text(json.dumps({**res.to_dict(), "hospital": a.preset, "seconds": round(secs, 1)}, indent=1, default=str), encoding="utf-8")
         (RESULTS / "plan_search" / f"{name}.txt").write_text(format_table(res), encoding="utf-8")
