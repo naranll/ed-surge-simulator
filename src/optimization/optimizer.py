@@ -780,7 +780,7 @@ def _decide(chosen: Plan, truth: dict) -> tuple:
 
 def plan_search(scenario_name: str, n_seeds: int = DEFAULT_SEEDS, quick: bool = False, api=None,
                 workers: int = 1, burst: bool = False, settings: Optional[Settings] = None,
-                runner=None, replications: Optional[int] = None) -> PlanSearchResult:
+                runner=None, replications: Optional[int] = None, rule_c: Optional[bool] = None) -> PlanSearchResult:
     """Offline plan search for one scenario.
 
     quick=True: 5 seeds and the coarse grid. ``api`` offers generate, forecast, truth_seed,
@@ -800,6 +800,10 @@ def plan_search(scenario_name: str, n_seeds: int = DEFAULT_SEEDS, quick: bool = 
     sel = select_plan(info, n_seeds, plan_grid(quick), api, workers, settings, runner)
     truth = evaluate_on_truth(sel.best.plan, scenario_name, n_seeds, api, burst, workers, settings, runner)
     recommended, reason = _decide(sel.best.plan, truth)
+    if rule_c is None:
+        rule_c = not _legacy_params()
+    if rule_c and recommended.is_nothing and scenario_name != "normal":
+        recommended, reason, truth = _apply_rule_c(scenario_name, sel, truth, reason, n_seeds, api, burst, workers, settings, runner)
     caution = ""
     if info.get("burst_possible"):
         caution = ("A sudden burst of urgent patients is possible on this day. The forecast cannot "
@@ -808,6 +812,60 @@ def plan_search(scenario_name: str, n_seeds: int = DEFAULT_SEEDS, quick: bool = 
     rows = [_row(s, sel.best.plan, recommended, truth) for s in sel.stats]
     return PlanSearchResult(scenario_name, n_seeds, quick, info, rows, sel.best.plan, recommended,
                             reason, truth, caution, asdict(settings))
+
+
+# ---- rule (c) -----------------------------------------------------------------
+# ADDED 2026-10-18 (team decision, option c): when urgent breaches are ABOVE a normal day, never return "do nothing"
+# unless every tested plan's 95% range includes 0; then say "No tested plan helps; constraint is <...>".
+# "Breaches rise" = the do-nothing share of urgent (triage 1-3) patients seen late on the truth days is higher than on
+# normal-day truth days with the same day numbers. RULE_C_MAX_CHECKS (UNSOURCED compute budget): how many candidate plans
+# are re-checked on the truth days before giving up.
+RULE_C_MAX_CHECKS = 3
+
+
+def _legacy_params() -> bool:
+    try:
+        from src.simulation.scenarios import USE_LEGACY_PARAMS
+        return bool(USE_LEGACY_PARAMS)
+    except ImportError:
+        return False
+
+
+def normal_reference_late_pct(api, n_seeds: int, workers: int = 1, runner=None) -> float:
+    """Do-nothing % of urgent patients seen late on NORMAL truth days (same day numbers)."""
+    jobs = [(api.generate("normal", api.truth_seed(i))[0], [DO_NOTHING]) for i in range(n_seeds)]
+    runs = run_batches(jobs, workers, runner)
+    return 100.0 * (1.0 - sum(r[0].urgent_share for r in runs) / len(runs))
+
+
+def _apply_rule_c(scenario_name, sel, truth, reason, n_seeds, api, burst, workers, settings, runner):
+    info = {"applied": False}
+    try:
+        ref = normal_reference_late_pct(api, n_seeds, workers, runner)
+    except Exception as err:                      # e.g. a stub api without a normal day
+        return DO_NOTHING, reason, {**truth, "rule_c": {"applied": False, "note": f"normal reference unavailable: {err!r}"}}
+    base = 100.0 - truth["base_on_time_pct"]
+    info.update(base_late_pct=base, normal_late_pct=ref, breaches_rise=base > ref + 1e-9)
+    if not info["breaches_rise"]:
+        return DO_NOTHING, reason, {**truth, "rule_c": info}
+    cands = sorted([s for s in sel.stats if not s.plan.is_nothing and s.feasible and s.gain_lo is not None and s.gain_lo > 0],
+                   key=lambda s: (-s.score, s.plan.cost, s.plan.start))
+    for s in cands[:RULE_C_MAX_CHECKS]:
+        t2 = evaluate_on_truth(s.plan, scenario_name, n_seeds, api, burst, workers, settings, runner)
+        if t2["gain_lo"] is not None and t2["gain_lo"] > 0 and t2["fairness_ok"]:
+            info["applied"] = "plan"
+            why = (f"Rule (c): urgent patients are seen late more often than on a normal day ({base:.1f}% vs {ref:.1f}%), so "
+                   f"'do nothing' is not allowed while a plan helps. '{s.plan.label}' has a paired gain of {t2['gain']:+.2f} points "
+                   f"(95% range {t2['gain_lo']:+.2f} to {t2['gain_hi']:+.2f}) on {t2['n_seeds']} truth days: above 0 but not above "
+                   f"the {MIN_BENEFIT_PP:g}-point bar. Fairness limit holds.")
+            return s.plan, why, {**t2, "rule_c": info}
+    diag = getattr(runner, "diagnose", None)
+    constraint = (diag(api.generate(scenario_name, api.truth_seed(0), burst=burst)[0]) if callable(diag)
+                  else "not known (no hospital model is attached to this search)")
+    info.update(applied="no_plan_helps", constraint=constraint)
+    why = (f"No tested plan helps; constraint is {constraint}. Urgent patients are seen late more often than on a normal day "
+           f"({base:.1f}% vs {ref:.1f}%), but every tested plan's 95% range includes 0 or fails the truth / fairness check.")
+    return DO_NOTHING, why, {**truth, "rule_c": info}
 
 
 def _row(s: PlanStats, selected: Plan, recommended: Plan, truth: dict) -> dict:
@@ -857,6 +915,9 @@ def format_table(result: PlanSearchResult, top: int = 10) -> str:
            f"Look-ahead pick : {result.selected.label}",
            f"RECOMMENDED     : {result.recommended.label}",
            f"Why             : {result.reason}"]
+    if not result.recommended.is_nothing:
+        out.append(f"Cost            : ${result.recommended.cost:,.0f} = {result.recommended.staff_hours:g} staff-hours "
+                   "(costs are UNSOURCED, illustrative)")
     t = result.truth
     if not result.selected.is_nothing:
         out.append(f"Truth check     : urgent on time {t['base_on_time_pct']:.1f}% -> {t['plan_on_time_pct']:.1f}%, "
@@ -876,7 +937,7 @@ def format_table(result: PlanSearchResult, top: int = 10) -> str:
     if len(shown) < len(rows):
         out.append(f"({len(shown)} of {len(rows)} plans shown; use --top 0 to show all)")
     out.append("Gain = score points over do nothing (1 point = 1 percentage point of urgent patients "
-               "seen on time, after cost and LWBS penalties).")
+               "seen on time, after cost and LWBS penalties). Costs are UNSOURCED, illustrative; StaffH = staff-hours.")
     return "\n".join(out)
 
 
