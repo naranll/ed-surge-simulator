@@ -129,12 +129,19 @@ def run_day(cfg: HospitalConfig, patients: Sequence, plan: Optional[Plan] = None
     return sim
 
 
-def runner_for(cfg: HospitalConfig):
+@dataclass(frozen=True)
+class HospitalRunner:
+    """``runner(plan, patients)`` that scores a plan on ONE hospital. Picklable, so the plan search can use a worker pool."""
+    cfg: HospitalConfig
+    parallel_safe = True
+
+    def __call__(self, plan: Plan, patients: Sequence):
+        return compute_metrics(run_day(self.cfg, patients, plan), 0.0, DAY_MIN)
+
+
+def runner_for(cfg: HospitalConfig) -> HospitalRunner:
     """A ``runner(plan, patients)`` for the optimiser's plan_search / select_plan (so plans are scored on THIS hospital)."""
-    def run(plan: Plan, patients: Sequence):
-        sim = run_day(cfg, patients, plan)
-        return compute_metrics(sim, 0.0, DAY_MIN)
-    return run
+    return HospitalRunner(cfg)
 
 
 # ------------------------------------------------------------------ measuring

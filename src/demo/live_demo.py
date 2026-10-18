@@ -20,7 +20,7 @@ from src.simulation.ed_simulator import EDSim
 from src.simulation.hospital import HospitalConfig, PRESETS, build_sim, prepare
 from src.simulation.scenarios import lookahead_seed, truth_seed
 
-DEFAULT_REPLICATIONS = 5     # forecast runs per action (step 6 makes this configurable)
+DEFAULT_REPLICATIONS = 30    # forecast runs per action (run.py --replications); 30 so that 95% ranges are meaningful
 
 
 def reference_config() -> HospitalConfig:

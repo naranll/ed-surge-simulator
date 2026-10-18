@@ -125,7 +125,9 @@ def _ci(xs: Sequence[float]) -> tuple[float, float, float]:
     m = sum(xs) / len(xs)
     if len(xs) < 2:
         return m, m, m
-    h = _T95.get(len(xs) - 1, 1.96) * statistics.stdev(xs) / math.sqrt(len(xs))
+    # CHANGED 2026-10-18: full Student-t table (t_critical). Same values as the old _T95 up to df 9;
+    # the old code fell back to 1.96 above df 9, which is too narrow for e.g. 30 replications (t = 2.045).
+    h = t_critical(len(xs) - 1) * statistics.stdev(xs) / math.sqrt(len(xs))
     return m, m - h, m + h
 
 
@@ -585,12 +587,22 @@ def _batch_job(job) -> list:
     return [run_plan(p, patients) for p in plans]
 
 
+def _runner_job(job) -> list:
+    """Pool worker for a picklable runner: one set of patients, several plans."""
+    runner, patients, plans = job
+    return [runner(p, patients) for p in plans]
+
+
 def run_batches(jobs: Sequence, workers: int = 1, runner=None) -> list:
     """jobs = [(patients, [plans])]. Returns, per job, the list of RunMetrics (same order as plans).
 
-    ``runner(plan, patients)`` replaces run_plan (used by tests); it forces a serial run.
+    ``runner(plan, patients)`` replaces run_plan (used by tests); it forces a serial run, unless the runner
+    says it can be sent to worker processes (attribute ``parallel_safe`` = True, e.g. hospital.HospitalRunner).
     """
     if runner is not None:
+        if workers > 1 and len(jobs) > 1 and getattr(runner, "parallel_safe", False):   # ADDED 2026-10-18
+            with ProcessPoolExecutor(workers) as ex:
+                return list(ex.map(_runner_job, [(runner, pats, plans) for pats, plans in jobs]))
         return [[runner(p, pats) for p in plans] for pats, plans in jobs]
     if workers > 1 and len(jobs) > 1:
         with ProcessPoolExecutor(workers) as ex:
@@ -767,7 +779,7 @@ def _decide(chosen: Plan, truth: dict) -> tuple:
 
 def plan_search(scenario_name: str, n_seeds: int = DEFAULT_SEEDS, quick: bool = False, api=None,
                 workers: int = 1, burst: bool = False, settings: Optional[Settings] = None,
-                runner=None) -> PlanSearchResult:
+                runner=None, replications: Optional[int] = None) -> PlanSearchResult:
     """Offline plan search for one scenario.
 
     quick=True: 5 seeds and the coarse grid. ``api`` offers generate, forecast, truth_seed,
@@ -778,6 +790,8 @@ def plan_search(scenario_name: str, n_seeds: int = DEFAULT_SEEDS, quick: bool = 
     settings = settings or DEFAULT_SETTINGS
     if quick:
         n_seeds = QUICK_SEEDS
+    if replications is not None:      # ADDED 2026-10-18: explicit replications win, also in quick mode
+        n_seeds = int(replications)
     if n_seeds < 1:
         raise ValueError("n_seeds must be at least 1")
     check_seed_streams(api, n_seeds)

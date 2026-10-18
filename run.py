@@ -17,7 +17,9 @@ def main() -> None:
     ap.add_argument("--scenario", choices=registry.names(), default="compound")
     ap.add_argument("--hour", type=float, default=14.0)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--workers", type=int, default=1, help="worker processes for the forecast runs (1 = serial)")
+    ap.add_argument("--replications", type=int, default=30,
+                    help="forecast runs per action (default 30; ignored with ED_USE_LEGACY_PARAMS=1, which keeps the old 5)")
     a = ap.parse_args()
     if a.cmd == "dashboard":
         sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", "src/dashboard/app.py"]))
@@ -38,13 +40,14 @@ def main() -> None:
         return
     from src.demo.live_demo import compute_view, rolling_view
     if a.cmd == "demo":
-        v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers)
+        v = compute_view(a.scenario, a.hour * 60, a.seed, a.workers, a.replications)
         c = v["config"]
         print(f"Scenario: {v['label']}. {v['description']}")
-        print(f"Hospital: {c.effective_beds} beds, {c.doctors} doctors, {c.triage_capacity} triage nurses (configs/capacity.json)\n")
+        print(f"Hospital: {c.effective_beds} beds, {c.doctors} doctors, {c.triage_capacity} triage nurses (configs/capacity.json). "
+              f"Forecast runs per action: {a.replications}\n")
         print(v["rec"].headline(), "\n\n" + v["briefing"])
     else:
-        for r in rolling_view(a.scenario, a.seed, 0, 24 * 60, 30, workers=a.workers):
+        for r in rolling_view(a.scenario, a.seed, 0, 24 * 60, 30, workers=a.workers, replications=a.replications):
             print(f"{int(r.t // 60):02d}:{int(r.t % 60):02d}  {r.action:<45} breach -{r.breach_reduction_pct:3.0f}%  "
                   f"wait -{r.wait_reduction:4.0f}m  cost ${r.cost:,.0f}")
 

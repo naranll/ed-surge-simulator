@@ -78,6 +78,8 @@ def main(argv=None) -> int:
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--all-tests", action="store_true")
     ap.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 1))
+    ap.add_argument("--replications", type=int, default=None,
+                    help="plan-search replications per plan (default: 30 in --quick, 50 in full)")
     a = ap.parse_args(argv)
     RESULTS.mkdir(exist_ok=True)
     log = Logger(RESULTS / "run.log")
@@ -99,7 +101,8 @@ def main(argv=None) -> int:
     summary = [l for l in out.splitlines() if " passed" in l or " failed" in l or " error" in l]
     env["tests_summary"] = summary[-1].strip() if summary else None
 
-    step("scenarios_and_plan_search", [PY, "scripts/run_scenarios.py"] + (["--quick"] if a.quick else ["--seeds", "50"]))
+    step("scenarios_and_plan_search", [PY, "scripts/run_scenarios.py", "--workers", str(a.workers)]
+         + (["--quick"] if a.quick else ["--seeds", "50"]) + (["--replications", str(a.replications)] if a.replications else []))
     days = 60 if a.quick else 750
     step("early_warning_data", [PY, "scripts/generate_days.py", "--days", str(days), "--workers", str(a.workers)])
 

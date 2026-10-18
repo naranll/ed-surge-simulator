@@ -228,7 +228,7 @@ st.subheader("4. Recommended plan")
 st.caption("Tests an extra doctor for 6 hours, fast track and faster ward transfers, at different start times, on many simulated days built from the advance forecast only. "
            "A plan is recommended only if the low end of its 95% benefit range stays above a small margin (2 points, an ASSUMPTION) and non-urgent patients do not wait unfairly longer (median wait up at most 15%). "
            "The search starts from your beds, staff and fast-track setting; it adds its own extra shift and transfer speed-up.")
-n_seeds = st.slider("Days to test each plan on", 10, 50, 20, help="More days = a firmer answer but a longer wait (about 10-40 seconds).")
+n_seeds = st.slider("Days to test each plan on", 10, 50, 30, help="More days = a firmer answer but a longer wait (about 10-40 seconds).")
 if st.button("Find the best plan for this day type"):
     try:
         rd = search_plan(cfg_d, scenario, burst, n_seeds)
