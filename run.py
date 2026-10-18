@@ -44,12 +44,13 @@ def main() -> None:
         c = v["config"]
         print(f"Scenario: {v['label']}. {v['description']}")
         print(f"Hospital: {c.effective_beds} beds, {c.doctors} doctors, {c.triage_capacity} triage nurses (configs/capacity.json). "
-              f"Forecast runs per action: {a.replications}\n")
-        print(v["rec"].headline(), "\n\n" + v["briefing"])
+              f"Forecast runs per plan: {a.replications}\n")
+        print("\n".join(v["decision"].lines()))
     else:
-        for r in rolling_view(a.scenario, a.seed, 0, 24 * 60, 30, workers=a.workers, replications=a.replications):
-            print(f"{int(r.t // 60):02d}:{int(r.t % 60):02d}  {r.action:<45} breach -{r.breach_reduction_pct:3.0f}%  "
-                  f"wait -{r.wait_reduction:4.0f}m  cost ${r.cost:,.0f}")
+        for d in rolling_view(a.scenario, a.seed, 0, 24 * 60, 30, workers=a.workers, replications=a.replications):
+            rng = "" if d.gain_lo is None else f"gain {d.gain:+5.1f} (95% {d.gain_lo:+.1f} to {d.gain_hi:+.1f})"
+            cost = "" if d.plan.is_nothing else f"${d.plan.cost:,.0f} / {d.plan.staff_hours:g} staff-h"
+            print(f"{int(d.t // 60):02d}:{int(d.t % 60):02d}  {d.label:<46} {rng:<30} {cost:<18} [{d.rule}]")
 
 
 if __name__ == "__main__":

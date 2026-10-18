@@ -37,9 +37,10 @@ def test_hospital_runner_is_picklable_and_parallel_gives_the_same_result():
 
 @pytest.mark.skipif(USE_LEGACY_PARAMS, reason="legacy route keeps the old 5 runs")
 def test_demo_uses_the_requested_number_of_replications():
-    from src.demo.live_demo import DEFAULT_REPLICATIONS, LiveDay, recommend_now
+    from src.demo.live_demo import DEFAULT_REPLICATIONS, LiveDay, decide, forecast_patients
     assert DEFAULT_REPLICATIONS == 30
     live = LiveDay("heatwave", 3)
     live.advance_to(600)
-    rec = recommend_now(live, replications=6)
-    assert all(len(v) == 6 for v in rec.results.values())
+    assert len(forecast_patients(live, 6)) == 6
+    dec = decide(live, replications=6)
+    assert dec.base["urgent_on_time_pct"] >= 0 and len(dec.rows) == 12
