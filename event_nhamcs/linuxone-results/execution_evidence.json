@@ -1,0 +1,36 @@
+{
+  "started_utc": "2026-10-17T14:18:17.902384+00:00",
+  "completed_utc": "2026-10-17T14:18:19.924549+00:00",
+  "system": "Linux",
+  "architecture": "s390x",
+  "uname_m": "s390x",
+  "python": "3.10.12",
+  "source_sha256": "439a87b766cba5e8c7b838372f45b680ba29295b148078b50e8ab7056d20349b",
+  "output_sha256": "f3f533d682665116a1a4d27aecbc2cd94121394bc42c15c2ad9ed867fbf42369",
+  "source_unchanged": true,
+  "repeat_export_identical": true,
+  "reference_checks": {
+    "shape_58124_by_49": true,
+    "arrival_denominator": true,
+    "arrival_exclusions": true,
+    "all_hour_counts": true,
+    "peak_hour": true,
+    "triage_denominator": true,
+    "all_triage_counts": true,
+    "probabilities": true
+  },
+  "tests": {
+    "exit_code": 0,
+    "summary": [
+      "Ran 7 tests in 0.003s",
+      "",
+      "OK"
+    ]
+  },
+  "code_sha256": {
+    "export_parameters.py": "ccdc56d08cb43e0d3322eeaa245b27e8cf8e899ad83962c232ef3a642426e054",
+    "test_export_parameters.py": "7319fa3bab56e199384ffe719e3269d9e8dc45db7d4dc9265de04be2a7ba7041",
+    "nhamcs_preprocessing.ipynb": "ee2782bcf3a8643a6ff628ba95bdd778dbaa9e53949c6c43193761ac2973137c"
+  },
+  "eligibility": "Execution evidence only; does not establish event eligibility."
+}

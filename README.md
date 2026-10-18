@@ -1,4 +1,6 @@
-# ED Surge Simulator
+# PulseOps - ED Surge Simulator
+
+Live demo (Streamlit, deployed from a separate repo that is not synced with this one): https://ed-surge-simulator.streamlit.app/
 
 A simulator and early-warning tool for a hospital emergency department (ED). It runs a normal day, a heatwave, a hurricane
 or a combined surge, shows where the ED strains first (urgent waits, beds, or staff), warns about the next 4 hours, and tests
@@ -30,6 +32,14 @@ national survey data (NHAMCS 2022), and many settings are stated assumptions (li
 | Live demo (next 4 hours) | Same rules as the plan search, applied to the next 4 hours of a live day. | `run.py`, `src/demo/live_demo.py` |
 | Dashboard | A what-if page for a hospital planner (laptop only). | `src/dashboard/app_v2.py` |
 | One-command run | Tests, scenarios and plan search, both models, timing. | `run_all.py` |
+
+## Other parts in this repo
+
+| Part | What it is | Where | How to run |
+| --- | --- | --- | --- |
+| Classic dashboard | The first Streamlit digital-twin page: 20-bed floor plan, waiting room, intervention toggles, 24-hour charts, shift briefing. Uses the original placeholder simulator settings, not the calibrated capacity or the plan-search rulebook. | `src/dashboard/app.py` | `python run.py dashboard` or `streamlit run src/dashboard/app.py` |
+| Web front end | A React + TypeScript + Vite page. It does not call the Python code. | `frontend/` | `cd frontend && npm install && npm run dev` |
+| NHAMCS 2018-22 export with LinuxONE evidence | A standalone, standard-library exporter of arrival-hour and triage shares from the third-party NHAMCS 2018-22 file, with an execution record from an s390x machine (2026-10-17). The simulator does not read it; it is a cross-check only. | `event_nhamcs/` | See `event_nhamcs/README.md` |
 
 ## Scenarios
 
@@ -181,3 +191,12 @@ Target container: Python 3.12, numpy 2.0.2, pandas 3.0.6, scikit-learn 1.9.0, xg
 If a step fails, the run records it and continues; read `results/run.log`. A step that needs the data file is skipped with a message if the file is missing.
 On s390x one test (exact text hashes of generated arrivals) is skipped on purpose: the last digit of some maths results can differ on that CPU; a separate test still checks the arrivals exactly.
 Say "ran on LinuxONE" only about what `results/linuxone_run.json` records.
+
+## Team
+
+- **Abhigyan Tiwari**: simulator, first optimiser, dashboards, web front end ([GitHub](https://github.com/Abh-igyan))
+- Team KnightAI, IBM Z Datathon 2026
+
+## License
+
+MIT. See [LICENSE](LICENSE).

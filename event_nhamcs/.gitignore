@@ -1,0 +1,13 @@
+outputs/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.csv
+*.zip
+.venv/
+.env
+.env.*
+*.pem
+*.key
+credentials*
+secrets*
