@@ -1,16 +1,16 @@
 {
   "early_warning": {
     "alarm_thresholds": {
-      "beds_full": 0.28955001533031455,
-      "lwbs": 0.14023067057132713,
-      "urgent_late": 0.2590454891324045
+      "beds_full": 0.2931644022464752,
+      "lwbs": 0.14042244851589203,
+      "urgent_late": 0.2560564875602722
     },
     "caveat": "This model learns the SIMULATOR, which rests on stated assumptions. It is a fast early-warning surrogate, not validated on a real hospital.",
     "chosen": {
       "beds_full": {
         "best_any_family": {
-          "cv_mean": 0.2632638775951459,
-          "cv_se": 0.00024342682249276713,
+          "cv_mean": 0.26328896129630697,
+          "cv_se": 0.0002508924809285213,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -22,8 +22,8 @@
         },
         "configs_tried": 12,
         "picked": {
-          "cv_mean": 0.26346636052819367,
-          "cv_se": 0.0007206512919212954,
+          "cv_mean": 0.2634167781485426,
+          "cv_se": 0.0005152360402191762,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -34,12 +34,12 @@
             "subsample": 0.7
           }
         },
-        "search_seconds": 22.1
+        "search_seconds": 19.3
       },
       "lwbs": {
         "best_any_family": {
-          "cv_mean": 0.14962895165000148,
-          "cv_se": 0.0005561582705342086,
+          "cv_mean": 0.1498222553558299,
+          "cv_se": 0.0005508679901967626,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -52,8 +52,8 @@
         },
         "configs_tried": 12,
         "picked": {
-          "cv_mean": 0.14962895165000148,
-          "cv_se": 0.0005561582705342086,
+          "cv_mean": 0.1498222553558299,
+          "cv_se": 0.0005508679901967626,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -64,12 +64,12 @@
             "subsample": 1.0
           }
         },
-        "search_seconds": 19.3
+        "search_seconds": 16.8
       },
       "urgent_late": {
         "best_any_family": {
-          "cv_mean": 0.3661736185092898,
-          "cv_se": 0.0034309413278274356,
+          "cv_mean": 0.36614682599442544,
+          "cv_se": 0.0036112403936493227,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -81,8 +81,8 @@
         },
         "configs_tried": 12,
         "picked": {
-          "cv_mean": 0.36652089213525424,
-          "cv_se": 0.0036403231196793354,
+          "cv_mean": 0.36652226318592046,
+          "cv_se": 0.0036292143166700578,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -93,7 +93,7 @@
             "subsample": 1.0
           }
         },
-        "search_seconds": 18.8
+        "search_seconds": 19.4
       }
     },
     "data": {
@@ -105,50 +105,50 @@
     },
     "headline_stage3_all_scenarios": {
       "beds_full": {
-        "auc_roc": 0.9402185121415936,
-        "auc_roc_hi": 0.9464178383402064,
-        "auc_roc_lo": 0.9350608702516949,
-        "brier": 0.08510909456506141,
-        "ece": 0.008754558342926126,
-        "false_alarm_snapshots_per_normal_day": 1.2,
+        "auc_roc": 0.9402444750438892,
+        "auc_roc_hi": 0.9464148494535424,
+        "auc_roc_lo": 0.9350007396374357,
+        "brier": 0.08506691267067833,
+        "ece": 0.008806122532799297,
+        "false_alarm_snapshots_per_normal_day": 1.2066666666666668,
         "median_lead_min": 255.0,
-        "pr_auc": 0.8639413314827907,
-        "recall_at_5pct_fpr": 0.8694768918232605,
+        "pr_auc": 0.8641040969851179,
+        "recall_at_5pct_fpr": 0.8676993397663789,
         "rule_recall_at_5pct_fpr": 0.6121127475876079
       },
       "lwbs": {
-        "auc_roc": 0.9734188700707391,
-        "auc_roc_hi": 0.9767660504249617,
-        "auc_roc_lo": 0.9690172931847834,
-        "brier": 0.04245897545589727,
-        "ece": 0.0041332331180698005,
-        "false_alarm_snapshots_per_normal_day": 2.013333333333333,
-        "median_lead_min": 296.8428572379579,
-        "pr_auc": 0.9087126201274444,
-        "recall_at_5pct_fpr": 0.9214926590538336,
+        "auc_roc": 0.9735901698651729,
+        "auc_roc_hi": 0.9769358721935008,
+        "auc_roc_lo": 0.969327618222943,
+        "brier": 0.042347812206003935,
+        "ece": 0.004441498424386918,
+        "false_alarm_snapshots_per_normal_day": 2.033333333333333,
+        "median_lead_min": 288.7030759374004,
+        "pr_auc": 0.9090876832840635,
+        "recall_at_5pct_fpr": 0.9208809135399674,
         "rule_recall_at_5pct_fpr": 0.7926182707993474
       },
       "urgent_late": {
-        "auc_roc": 0.8736042679850275,
-        "auc_roc_hi": 0.886070904570205,
-        "auc_roc_lo": 0.859080778275416,
-        "brier": 0.1134975346093058,
-        "ece": 0.011225807563378478,
+        "auc_roc": 0.8734168521263656,
+        "auc_roc_hi": 0.8859818765061613,
+        "auc_roc_lo": 0.8589107326645511,
+        "brier": 0.11355645120448289,
+        "ece": 0.010551922562555407,
         "false_alarm_snapshots_per_normal_day": 1.62,
-        "median_lead_min": 214.03856068931862,
-        "pr_auc": 0.7058436831731899,
-        "recall_at_5pct_fpr": 0.8142960288808664,
+        "median_lead_min": 214.72346697944096,
+        "pr_auc": 0.7055727342075129,
+        "recall_at_5pct_fpr": 0.8222382671480144,
         "rule_recall_at_5pct_fpr": 0.4607942238267148
       }
     },
-    "runtime_seconds": 117.0
+    "runtime_seconds": 89.0
   },
   "patient_flow": {
     "admission": {
       "all_configs": [
         {
           "cv_mean": 0.31027766863944284,
-          "cv_se": 0.005068765019865452,
+          "cv_se": 0.005068765019865438,
           "family": "logistic",
           "params": {
             "C": 0.1
@@ -156,23 +156,23 @@
         },
         {
           "cv_mean": 0.31066618530453016,
-          "cv_se": 0.004974736951115756,
+          "cv_se": 0.0049747369511157135,
           "family": "logistic",
           "params": {
             "C": 1.0
           }
         },
         {
-          "cv_mean": 0.3108939821362169,
-          "cv_se": 0.00492286384182938,
+          "cv_mean": 0.31089398213621733,
+          "cv_se": 0.004922863841829321,
           "family": "logistic",
           "params": {
             "C": 10.0
           }
         },
         {
-          "cv_mean": 0.3068400104132993,
-          "cv_se": 0.00399713386086353,
+          "cv_mean": 0.3067987154286793,
+          "cv_se": 0.004022926785314732,
           "family": "hgb",
           "params": {
             "l2_regularization": 5.0,
@@ -183,8 +183,8 @@
           }
         },
         {
-          "cv_mean": 0.30592074593243035,
-          "cv_se": 0.004050099780044498,
+          "cv_mean": 0.3060560358390702,
+          "cv_se": 0.003933586866883465,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -196,8 +196,8 @@
           }
         },
         {
-          "cv_mean": 0.30879782600232863,
-          "cv_se": 0.0032535792866768645,
+          "cv_mean": 0.3081456859976048,
+          "cv_se": 0.003336533842988412,
           "family": "hgb",
           "params": {
             "l2_regularization": 1.0,
@@ -208,8 +208,8 @@
           }
         },
         {
-          "cv_mean": 0.30983391283595985,
-          "cv_se": 0.004811642040422255,
+          "cv_mean": 0.30978929849789727,
+          "cv_se": 0.0046627309750490635,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -221,8 +221,8 @@
           }
         },
         {
-          "cv_mean": 0.3077952414545999,
-          "cv_se": 0.0027084477508954683,
+          "cv_mean": 0.3078902214921288,
+          "cv_se": 0.002685854976967949,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -233,8 +233,8 @@
           }
         },
         {
-          "cv_mean": 0.3076883097002078,
-          "cv_se": 0.003985934608714518,
+          "cv_mean": 0.3080888797414941,
+          "cv_se": 0.0036013067000299254,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -246,8 +246,8 @@
           }
         },
         {
-          "cv_mean": 0.3087281610807506,
-          "cv_se": 0.003114173650611951,
+          "cv_mean": 0.3087017490664696,
+          "cv_se": 0.0029870406274991584,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -258,8 +258,8 @@
           }
         },
         {
-          "cv_mean": 0.31903514836410957,
-          "cv_se": 0.0033599005565388357,
+          "cv_mean": 0.3161931526667128,
+          "cv_se": 0.0032174353688653565,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -272,7 +272,7 @@
         },
         {
           "cv_mean": 0.3063522511716269,
-          "cv_se": 0.0036746988606446676,
+          "cv_se": 0.00367469886064466,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -283,8 +283,8 @@
           }
         },
         {
-          "cv_mean": 0.3170272481124616,
-          "cv_se": 0.006651724575101962,
+          "cv_mean": 0.3143071168190169,
+          "cv_se": 0.006701665640580887,
           "family": "xgb",
           "params": {
             "learning_rate": 0.03,
@@ -296,8 +296,8 @@
           }
         },
         {
-          "cv_mean": 0.3086827733292196,
-          "cv_se": 0.0032265270540473637,
+          "cv_mean": 0.3085070027249412,
+          "cv_se": 0.003229595885823978,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -308,8 +308,8 @@
           }
         },
         {
-          "cv_mean": 0.31200298793218567,
-          "cv_se": 0.004113572332314832,
+          "cv_mean": 0.311206242465741,
+          "cv_se": 0.004206917428413502,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -333,8 +333,8 @@
           }
         },
         {
-          "cv_mean": 0.3072935284830492,
-          "cv_se": 0.0035144073786020397,
+          "cv_mean": 0.307392286422486,
+          "cv_se": 0.003597948704000841,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -346,8 +346,8 @@
           }
         },
         {
-          "cv_mean": 0.30951929085485924,
-          "cv_se": 0.00526560196298589,
+          "cv_mean": 0.30951972291902485,
+          "cv_se": 0.005265336338117011,
           "family": "hgb",
           "params": {
             "l2_regularization": 5.0,
@@ -358,8 +358,8 @@
           }
         },
         {
-          "cv_mean": 0.30635004997635423,
-          "cv_se": 0.003324429044333946,
+          "cv_mean": 0.30662305975177206,
+          "cv_se": 0.0031982575048436594,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -371,8 +371,8 @@
           }
         },
         {
-          "cv_mean": 0.30643806707135524,
-          "cv_se": 0.0030243601972330045,
+          "cv_mean": 0.30641149409250873,
+          "cv_se": 0.0030334574851821547,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -384,8 +384,8 @@
         }
       ],
       "best_by_cv": {
-        "cv_mean": 0.30592074593243035,
-        "cv_se": 0.004050099780044498,
+        "cv_mean": 0.3060560358390702,
+        "cv_se": 0.003933586866883465,
         "family": "xgb",
         "params": {
           "learning_rate": 0.06,
@@ -398,7 +398,7 @@
       },
       "chosen": {
         "cv_mean": 0.3063522511716269,
-        "cv_se": 0.0036746988606446676,
+        "cv_se": 0.00367469886064466,
         "family": "hgb",
         "params": {
           "l2_regularization": 0.0,
@@ -458,7 +458,7 @@
           "observed_rate": 0.1277
         }
       ],
-      "search_seconds": 20.7,
+      "search_seconds": 8.2,
       "test": {
         "baseline_triage_only": {
           "auc_roc": 0.7318082394912169,
@@ -533,9 +533,9 @@
           "pr_auc": 0.33395001271172403
         },
         "portable_saved_model": {
-          "auc_roc": 0.8448293320453293,
-          "brier": 0.08156259652822125,
-          "ece": 0.022921999310263983,
+          "auc_roc": 0.8452184231636461,
+          "brier": 0.08149781881201146,
+          "ece": 0.02162370337293669,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -545,7 +545,7 @@
             "reg_lambda": 5.0,
             "subsample": 0.9
           },
-          "pr_auc": 0.3952820795716469
+          "pr_auc": 0.3990678450711124
         }
       }
     },
@@ -569,15 +569,15 @@
         },
         {
           "cv_mean": 0.6568911948108973,
-          "cv_se": 0.01021588207255779,
+          "cv_se": 0.010215882072557808,
           "family": "logistic",
           "params": {
             "alpha": 100.0
           }
         },
         {
-          "cv_mean": 0.6492603646087158,
-          "cv_se": 0.008891497387469588,
+          "cv_mean": 0.6492840969449925,
+          "cv_se": 0.00891082209181874,
           "family": "hgb",
           "params": {
             "l2_regularization": 5.0,
@@ -588,8 +588,8 @@
           }
         },
         {
-          "cv_mean": 0.6469476871219488,
-          "cv_se": 0.008172693922897996,
+          "cv_mean": 0.6468091311254728,
+          "cv_se": 0.00789989209394184,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -601,8 +601,8 @@
           }
         },
         {
-          "cv_mean": 0.6543042120769854,
-          "cv_se": 0.008644363730494558,
+          "cv_mean": 0.6541724289366058,
+          "cv_se": 0.008580092690938717,
           "family": "hgb",
           "params": {
             "l2_regularization": 1.0,
@@ -613,8 +613,8 @@
           }
         },
         {
-          "cv_mean": 0.6494345224480897,
-          "cv_se": 0.008889892004187038,
+          "cv_mean": 0.649626612772906,
+          "cv_se": 0.009119446578788742,
           "family": "xgb",
           "params": {
             "learning_rate": 0.06,
@@ -626,8 +626,8 @@
           }
         },
         {
-          "cv_mean": 0.654070132112112,
-          "cv_se": 0.008895673949435946,
+          "cv_mean": 0.6542811287299827,
+          "cv_se": 0.008941717028727512,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -651,8 +651,8 @@
           }
         },
         {
-          "cv_mean": 0.6536473181558646,
-          "cv_se": 0.008968697930521448,
+          "cv_mean": 0.6535483360920928,
+          "cv_se": 0.008975038180476529,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -676,8 +676,8 @@
           }
         },
         {
-          "cv_mean": 0.6493528657374155,
-          "cv_se": 0.008548021102222383,
+          "cv_mean": 0.6492197112710085,
+          "cv_se": 0.008441774284555403,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -701,8 +701,8 @@
           }
         },
         {
-          "cv_mean": 0.654108914301365,
-          "cv_se": 0.008741731129723328,
+          "cv_mean": 0.6542888474322968,
+          "cv_se": 0.008658829680084688,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -713,8 +713,8 @@
           }
         },
         {
-          "cv_mean": 0.654859854894914,
-          "cv_se": 0.009829708928702238,
+          "cv_mean": 0.6550749554364865,
+          "cv_se": 0.010338501778269688,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -738,8 +738,8 @@
           }
         },
         {
-          "cv_mean": 0.6481492363478576,
-          "cv_se": 0.00877152824204116,
+          "cv_mean": 0.6483948110423906,
+          "cv_se": 0.008659917058320072,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -763,8 +763,8 @@
           }
         },
         {
-          "cv_mean": 0.6486570040059563,
-          "cv_se": 0.008834807610064365,
+          "cv_mean": 0.6478354728508082,
+          "cv_se": 0.008996608545870867,
           "family": "xgb",
           "params": {
             "learning_rate": 0.1,
@@ -776,8 +776,8 @@
           }
         },
         {
-          "cv_mean": 0.6493988248244762,
-          "cv_se": 0.008001882230256338,
+          "cv_mean": 0.6491054379269373,
+          "cv_se": 0.007963974530208771,
           "family": "hgb",
           "params": {
             "l2_regularization": 0.0,
@@ -812,7 +812,7 @@
           "min_samples_leaf": 50
         }
       },
-      "search_seconds": 11.3,
+      "search_seconds": 6.5,
       "target_note": "log(LOV - WAITTIME) in minutes: a proxy for time in the ED after first provider contact (includes tests, boarding).",
       "test": {
         "baseline_triage_median_only": {
@@ -855,8 +855,8 @@
         },
         "portable_saved_model": {
           "family": "xgb",
-          "mae_log": 0.6729635169998008,
-          "median_abs_error_log": 0.5227726745473484,
+          "mae_log": 0.6734199356887752,
+          "median_abs_error_log": 0.5144097399219811,
           "params": {
             "learning_rate": 0.06,
             "max_depth": 2,
@@ -865,7 +865,7 @@
             "reg_lambda": 5.0,
             "subsample": 0.9
           },
-          "r2": 0.1961155614306791
+          "r2": 0.19500515719073863
         }
       }
     },
@@ -888,7 +888,7 @@
       "triage_level": "IMMEDR_clean (valid 1-5 only)",
       "weekday": "VDAYR (official labels: 1 Sunday ... 7 Saturday)"
     },
-    "runtime_seconds": 43.9,
+    "runtime_seconds": 19.9,
     "saved_files": {
       "admission": "admission_xgboost.json",
       "admission_note": "CV winner is HistGradientBoosting (cannot be saved portably); the saved file is the best portable candidate instead: xgb {'n_estimators': 120, 'learning_rate': 0.06, 'max_depth': 2, 'min_child_weight': 1.0, 'subsample': 0.9, 'reg_lambda': 5.0}",

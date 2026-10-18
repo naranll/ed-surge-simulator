@@ -43,7 +43,7 @@
   "base_on_time_pct": 61.07971449577618,
   "plan_on_time_pct": 78.6161690634412,
   "base_nonurgent_median": 113.2217404788707,
-  "plan_nonurgent_median": 40.79239777088323,
+  "plan_nonurgent_median": 40.792397770883234,
   "nonurgent_change_pct": -63.9712323813854,
   "fairness_ok": true,
   "base_lwbs": 29.18,
@@ -1458,7 +1458,7 @@
    "truth_gain_lo": 15.809981631893185,
    "truth_gain_hi": 23.522927503436875,
    "truth_urgent_on_time_pct": 78.6161690634412,
-   "truth_nonurgent_median_wait_min": 40.79239777088323,
+   "truth_nonurgent_median_wait_min": 40.792397770883234,
    "truth_lwbs": 10.22,
    "recommended": true
   },
@@ -2088,5 +2088,5 @@
   }
  ],
  "hospital": "Large",
- "seconds": 15.2
+ "seconds": 9.7
 }
