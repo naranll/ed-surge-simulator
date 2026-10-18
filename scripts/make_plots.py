@@ -95,6 +95,8 @@ def waits_chart():
 
 def timing_chart():
     rec = jload(RESULTS / "linuxone_run.json")
+    if rec and rec.get("uname_m") != "s390x":     # a file with this name from another machine is not a LinuxONE result
+        rec = None
     label = "LinuxONE"
     if not rec:
         rec, label = jload(RESULTS / "local_run.json"), "LOCAL (not LinuxONE)"
@@ -144,6 +146,8 @@ def key_numbers():
           "- The early-warning model learns the simulator, which rests on stated assumptions; it is not validated on a real hospital.",
           "- The 'urgent median wait' of the simulator is lower than the survey's (see calibration table); we report this gap rather than hide it."]
     lx = jload(RESULTS / "linuxone_run.json")
+    if lx and lx.get("uname_m") != "s390x":
+        lx = None
     L += ["", "## LinuxONE", (f"- Recorded run: {lx.get('uname_m')}, {lx.get('nproc')} cores, {lx.get('total_seconds')} s total." if lx else "- No LinuxONE run recorded yet.")]
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "key_numbers.md").write_text("\n".join(L), encoding="utf-8")

@@ -299,6 +299,9 @@ else:
 # ------------------------------------------------------------------ 8. LinuxONE
 st.subheader("8. LinuxONE")
 lx = jload(ROOT / "results/linuxone_run.json")
+if lx and lx.get("uname_m") != "s390x":     # only a run that really happened on s390x counts as LinuxONE
+    st.warning(f"results/linuxone_run.json says machine {lx.get('uname_m')!r}, not s390x, so it is NOT shown as a LinuxONE result.")
+    lx = None
 if lx:
     st.success(f"LinuxONE run recorded: machine {lx.get('uname_m')}, {lx.get('nproc')} cores, Python {lx.get('python')}.")
     steps = lx.get("seconds_per_step", {})
