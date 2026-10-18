@@ -65,9 +65,9 @@
   }
  },
  "alarm_thresholds": {
-  "urgent_late": 0.2590454891324045,
-  "beds_full": 0.28955001533031455,
-  "lwbs": 0.14023067057132713
+  "urgent_late": 0.2560564875602722,
+  "beds_full": 0.2931644022464752,
+  "lwbs": 0.14042244851589203
  },
  "false_alarm_rate_on_normal_days": 0.05,
  "horizon_minutes": 240,

@@ -1,0 +1,73 @@
+{
+  "uname_m": "s390x",
+  "uname_a_system": "Linux-6.8.0-147-generic-s390x-with-glibc2.39",
+  "nproc": 3,
+  "python": "3.12.15",
+  "byteorder": "big",
+  "lscpu_summary": {
+    "Architecture": "s390x",
+    "Byte Order": "Big Endian",
+    "CPU(s)": "3",
+    "Model name": "-",
+    "Thread(s) per core": "1",
+    "Core(s) per socket": "1",
+    "Hypervisor vendor": "IBM"
+  },
+  "packages": {
+    "numpy": "2.0.2",
+    "pandas": "3.0.6",
+    "scipy": "1.13.1",
+    "sklearn": "1.9.0",
+    "xgboost": "3.4.1",
+    "matplotlib": "3.11.2",
+    "streamlit": null,
+    "pytest": "9.1.1"
+  },
+  "tests_summary": "142 passed, 2 skipped in 26.39s",
+  "mode": "full",
+  "finished": "2026-10-18 05:45:58",
+  "seconds_per_step": {
+    "tests": 26.7,
+    "scenarios_and_plan_search": 46.3,
+    "early_warning_data": 15.5,
+    "parallel_timing": 19.8,
+    "calibration": 7.2,
+    "patient_flow_model": 20.2,
+    "early_warning_model": 90.0,
+    "demo_results": 0.7,
+    "plots": 1.0
+  },
+  "step_status": {
+    "tests": "ok",
+    "scenarios_and_plan_search": "ok",
+    "early_warning_data": "ok",
+    "calibration": "ok",
+    "patient_flow_model": "ok",
+    "early_warning_model": "ok",
+    "demo_results": "ok",
+    "plots": "ok"
+  },
+  "parallel_timing": [
+    {
+      "workers": 1,
+      "seconds": 9.06,
+      "days": 1000,
+      "speedup_vs_1_worker": 1.0
+    },
+    {
+      "workers": 2,
+      "seconds": 4.67,
+      "days": 1000,
+      "speedup_vs_1_worker": 1.94
+    },
+    {
+      "workers": 4,
+      "seconds": 3.24,
+      "days": 1000,
+      "speedup_vs_1_worker": 2.8
+    }
+  ],
+  "total_seconds": 228.0,
+  "workers_used": 3,
+  "note": "Timing is wall-clock on this machine. More workers are not always faster for small jobs; compare the table, do not assume."
+}
