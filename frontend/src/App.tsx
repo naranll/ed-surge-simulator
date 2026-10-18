@@ -230,7 +230,7 @@ export function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                  PulseOps
+                  KnightAI
                 </h1>
                 <span className="text-slate-400">/</span>
                 <span className="text-xs sm:text-sm font-semibold text-slate-600">
