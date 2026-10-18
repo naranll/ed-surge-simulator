@@ -38,7 +38,7 @@ national survey data (NHAMCS 2022), and many settings are stated assumptions (li
 | Part | What it is | Where | How to run |
 | --- | --- | --- | --- |
 | Classic dashboard | The first Streamlit digital-twin page: 20-bed floor plan, waiting room, intervention toggles, 24-hour charts, shift briefing. Uses the original placeholder simulator settings, not the calibrated capacity or the plan-search rulebook. | `src/dashboard/app.py` | `python run.py dashboard` or `streamlit run src/dashboard/app.py` |
-| Web front end | A React + TypeScript + Vite page. It does not call the Python code. | `frontend/` | `cd frontend && npm install && npm run dev` |
+| Web front end / Digital Twin | Interactive React + TypeScript digital twin with 4-hour ML early warning surrogate, hospital scale presets, and real-time bed simulation. | `frontend/` | `python run.py twin` (portable static twin, works on s390x & local) or `cd frontend && npm run dev` |
 | NHAMCS 2018-22 export with LinuxONE evidence | A standalone, standard-library exporter of arrival-hour and triage shares from the third-party NHAMCS 2018-22 file, with an execution record from an s390x machine (2026-10-17). The simulator does not read it; it is a cross-check only. | `event_nhamcs/` | See `event_nhamcs/README.md` |
 
 ## Scenarios
