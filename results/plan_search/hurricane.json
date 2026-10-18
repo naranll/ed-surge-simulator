@@ -10,7 +10,10 @@
    0,
    24
   ],
-  "burst_possible": true
+  "burst_possible": true,
+  "components": [
+   "hurricane"
+  ]
  },
  "selected": {
   "label": "12:00-18:00 +1 clinician",
@@ -2084,5 +2087,5 @@
   }
  ],
  "hospital": "Large",
- "seconds": 50.2
+ "seconds": 15.1
 }
