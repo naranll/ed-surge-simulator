@@ -1,4 +1,4 @@
-# PulseOps - ED Surge Simulator
+# KnightAI - ED Surge Simulator
 
 **Team KnightAI** · IBM Z Datathon 2026
 
@@ -21,7 +21,7 @@ Live demo (Streamlit, deployed from a separate repo that is **not synced** with 
 - **Warns about the next 4 hours.** An early-warning model gives the chance of late urgent care, full beds or patients leaving
   unseen. It learns from simulated days, not from a real hospital.
 
-![PulseOps dashboard on a simulated heatwave day: recorded results, recommended plan and early warning](docs/images/dashboard_heatwave_1366.png)
+![KnightAI dashboard on a simulated heatwave day: recorded results, recommended plan and early warning](docs/images/dashboard_heatwave_1366.png)
 
 _The planner dashboard (`src/dashboard/app_v2.py`) on a simulated heatwave day, reading the final LinuxONE run in `results/`._
 
